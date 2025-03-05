@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from "react";
 import classNames from "classnames/bind";
 import styles from "./main.module.scss";
-import Chart from "../chart/Chart";
-import History from "../History/History";
-import Buttons from "../Buttons/Buttons";
+import Chart from "../../components/chart/Chart";
+import History from "../../components/History/History";
+import Buttons from "../../components/Buttons/Buttons";
 import svgs from "~/assets/svgs";
 import * as XLSX from "xlsx";
 import {saveAs} from "file-saver";
 import {getDatabase, ref, child, get} from "firebase/database";
-import {dbRef} from "../firebase/config";
+// import {dbRef} from "../../components/firebase/config";
 import axios from "axios";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faBars, faFilter, faMagnifyingGlass} from "@fortawesome/free-solid-svg-icons";
@@ -16,6 +16,10 @@ import {DatePicker, TimePicker, Space} from "antd";
 import Offcanvas from "react-bootstrap/Offcanvas";
 import Button from "react-bootstrap/Button";
 import dayjs from "dayjs";
+import images from "~/assets/images";
+import sortedData from "~/utils/sortData";
+import {fetchNodeData} from "~/apis/nodeData";
+import {averageRounded} from "~/utils/averageNumbers";
 const format = "HH:mm";
 const {RangePicker} = DatePicker;
 // import RangePickerDate from "../RangeDatePicker/RangePicker";
@@ -52,10 +56,26 @@ const Node1 = ({data}) => {
 
   const getData = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/data_sensor");
-      if (response.data && response.data.data.node1) {
-        setDataNodes(response.data.data.node1);
-        setFilteredData(response.data.data.node1);
+      // const response = await axios.get("http://localhost:3001/node_data");
+      const response = await fetchNodeData();
+      const dataNode = response.node2;
+      if (dataNode) {
+        const dataNodeFilterd = dataNode.map((item) => {
+          const time = item.created_at.split(" ")[1].slice(0, 5);
+          const date = item.created_at.split(" ")[0];
+          return {
+            temperature: item.temperature,
+            humidity: item.humidity,
+            time: `${time}`,
+            date: `${date}`,
+          };
+        });
+
+        const dataSorted = sortedData(dataNodeFilterd);
+        console.log("🚀 ~ getData ~ dataSorted:", dataSorted);
+
+        setDataNodes(dataSorted);
+        setFilteredData(dataSorted);
       } else {
         console.error("API không trả về dữ liệu node1.");
       }
@@ -146,6 +166,29 @@ const Node1 = ({data}) => {
     }
   };
 
+  const averageTemperature = () => {
+    if (!Array.isArray(dataNodes) || dataNodes.length === 0) {
+      console.error("dataNodes is not a valid array or is empty.");
+      return null;
+    }
+
+    const data = dataNodes
+      .slice(0, 20)
+      .map((item) => item?.temperature)
+      .filter((temp) => typeof temp === "number" && !isNaN(temp)); // Lọc giá trị hợp lệ
+
+    console.log("🚀 ~ averageTemperature ~ data:", data);
+
+    if (data.length === 0) {
+      console.error("No valid temperatures found.");
+      return null;
+    }
+
+    return Math.round(averageRounded(data));
+  };
+
+  console.log(averageTemperature());
+
   useEffect(() => {
     getData();
   }, []);
@@ -154,24 +197,26 @@ const Node1 = ({data}) => {
       <div className={cx("container", "poppins-regular")}>
         <header className={cx("header")}>
           <div className={cx("navbar")}>
-            <FontAwesomeIcon icon={faBars} />
+            <a className={cx("nav-link")} href="/">
+              <img src={images.logo} alt="" />
+            </a>
           </div>
-          <h1 className={cx("title")}>hệ thống điều khiển máy sấy phun</h1>
+          <h1 className={cx("title")}>SPRAY DRYER CONTROL SYSTEM</h1>
         </header>
         <main className={cx("main")}>
           <div className={cx("buttons")}>
-            <h2 className={cx("title")}>Thông số vận hành</h2>
+            <h2 className={cx("title")}>operating parameters</h2>
             <div className={cx("infomation")}>
               <div className={cx("card")}>
                 <table className={cx("table")}>
                   <tbody>
                     <tr>
-                      <th> Nhiệt độ vào buồng sấy:</th>
-                      <th className={cx("templerature")}>45°C </th>
+                      <th>Temperature entering the drying chamber:</th>
+                      <th className={cx("templerature")}>45°C</th>
                     </tr>
                     <tr>
-                      <th>Tốc độ bơm dịch</th>
-                      <th className={cx("pump_speed")}>60v/phút </th>
+                      <th>Average temperature:</th>
+                      <th className={cx("pump_speed")}>{averageTemperature()}°C</th>
                     </tr>
                   </tbody>
                 </table>
@@ -219,7 +264,7 @@ const Node1 = ({data}) => {
                       return (
                         <tr key={index}>
                           <td>{index + 1}</td>
-                          <td>{item.temperature}C</td>
+                          <td>{item.temperature}°C</td>
                           <td>{item.humidity}%</td>
                           <td>{item.time}</td>
                           <td>{item.date}</td>
@@ -233,7 +278,7 @@ const Node1 = ({data}) => {
           </div>
           <div className={cx("content")}>
             <div className={cx("chart")}>
-              <h2 className={cx("title")}>Biểu đồ giá trị nhiệt độ, độ ẩm theo thời gian thực</h2>
+              <h2 className={cx("title")}>Real-time temperature and humidity value chart</h2>
               <Chart data={dataNodes} />
               <div className={cx("export_btn")}>
                 <button className={cx("export_excel")}>

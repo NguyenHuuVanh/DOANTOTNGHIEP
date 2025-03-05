@@ -6,7 +6,10 @@ import styles from "./Chart.module.scss";
 const cx = classNames.bind(styles);
 
 const Chart = ({data}) => {
-  console.log(data);
+  console.log("🚀 ~ Chart ~ data:", data);
+  const filteredData = [];
+  let prevTime = null;
+
   const mappedData = [
     ...(Array.isArray(data)
       ? data.map((item) => ({
@@ -16,8 +19,35 @@ const Chart = ({data}) => {
         }))
       : []),
   ];
+  console.log("🚀 ~ Chart ~ mappedData:", mappedData);
 
-  console.log(mappedData);
+  if (Array.isArray(data)) {
+    data.forEach((item) => {
+      const [hours, minutes] = item.time.split(":").map(Number); // Tách giờ và phút
+      const currentTime = new Date(0, 0, 0, hours, minutes); // Ngày mặc định
+
+      if (!prevTime || (currentTime - prevTime) / 60000 >= 5) {
+        filteredData.push({
+          name: item.time,
+          Temperature: item.temperature,
+          Humidity: item.humidity,
+        });
+        prevTime = currentTime; // Cập nhật thời gian trước đó
+      }
+    });
+  }
+
+  // const mappedData = [
+  //   ...(Array.isArray(data)
+  //     ? data.map((item) => ({
+  //         name: item.time,
+  //         Temperature: item.temperature,
+  //         Humidity: item.humidity,
+  //       }))
+  //     : []),
+  // ];
+
+  console.log(filteredData);
 
   const CustomTooltip = ({active, payload, label}) => {
     if (active && payload && payload.length) {
@@ -46,6 +76,7 @@ const Chart = ({data}) => {
     <div style={{width: "", height: "600px", margin: "20px 0"}}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={mappedData.splice(0, 20)}>
+          {/* <LineChart data={filteredData.splice(0, 20)}> */}
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" padding={{left: 30, right: 30}} tick={{fontSize: 14}} />
           <YAxis />

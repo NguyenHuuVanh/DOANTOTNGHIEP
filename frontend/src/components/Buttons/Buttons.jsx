@@ -2,13 +2,12 @@ import React, {useState} from "react";
 import classNames from "classnames/bind";
 import styles from "./Buttons.module.scss";
 import {getDatabase, ref, set} from "firebase/database";
-import {dbRef} from "../firebase/config";
+// import {dbRef} from "../firebase/config";
 
 const cx = classNames.bind(styles);
 
 const Buttons = ({value, data, number}) => {
   const [checked, setChecked] = useState(false);
-  console.log(data);
 
   const updateData = (relayValue) => {
     const db = getDatabase();

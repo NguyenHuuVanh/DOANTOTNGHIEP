@@ -21,3 +21,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Bỏ qua file .env để không bị lộ thông tin nhạy cảm
+.env
+
