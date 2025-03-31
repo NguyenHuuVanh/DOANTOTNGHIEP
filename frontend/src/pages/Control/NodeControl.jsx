@@ -1,32 +1,123 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import classNames from "classnames/bind";
 import styles from "./main.module.scss";
-import Chart from "../../components/chart/Chart";
-import History from "../../components/History/History";
 import Buttons from "../../components/Buttons/Buttons";
-import svgs from "~/assets/svgs";
-import * as XLSX from "xlsx";
-import {saveAs} from "file-saver";
-import {getDatabase, ref, child, get, set} from "firebase/database";
-import {dbRef} from "~/firebase/config";
 import axios from "axios";
 import images from "~/assets/images";
 import DeviceStatistics from "~/components/DeviceStatistics/deviceStatistics";
+import notify from "~/utils/toastify";
 
 const cx = classNames.bind(styles);
 
 const NodeControl = () => {
   const [data, setData] = useState(null);
   const [activeButtons, setActiveButtons] = useState({});
+  const [relays, setRelays] = useState([]);
+  const [isAutoRunning, setIsAutoRunning] = useState(false);
+  const [isCheked, setIsChecked] = useState(false);
+  const autoIntervalRef = useRef(null);
+  const currentRelayIndex = useRef(0);
 
-  const handleButtonClick = (id) => {
-    setActiveButtons((prevState) => ({
-      ...prevState,
-      [id]: !prevState[id],
-    }));
+  const toggleRelay = async (id) => {
+    try {
+      const response = await axios.put(`http://localhost:3001/node_control/${id}`, {
+        status: "OFF", // Luôn gửi trạng thái OFF khi toggle
+      });
+      setRelays((prev) => prev.map((relay) => (relay.id === id ? {...relay, status: response.data.status} : relay)));
+    } catch (error) {
+      console.error("Lỗi khi cập nhật relay:", error);
+    }
   };
 
-  useEffect(() => {}, []);
+  const startAutoMode = () => {
+    notify.success("Start Auto Mode");
+    if (!isAutoRunning) {
+      // Đảm bảo tất cả relay đã tắt trước khi chạy auto
+      relays.forEach(async (relay) => {
+        if (relay.status === "ON") {
+          await toggleRelay(relay.id);
+        }
+      });
+
+      setIsAutoRunning(true);
+      currentRelayIndex.current = 0;
+      autoIntervalRef.current = setInterval(async () => {
+        if (currentRelayIndex.current < relays.length) {
+          const relay = relays[currentRelayIndex.current];
+          if (relay.status === "OFF") {
+            await toggleRelay(relay.id);
+          }
+          currentRelayIndex.current++;
+        }
+      }, 2000); // 3 giây
+    }
+  };
+
+  // Hàm dừng chế độ "Stop Auto"
+  const stopAutoMode = () => {
+    notify.error("Stop Auto Mode");
+    clearInterval(autoIntervalRef.current);
+    autoIntervalRef.current = null;
+    setIsAutoRunning(false);
+    currentRelayIndex.current = 0;
+
+    // Tắt tất cả relay
+    relays.forEach(async (relay) => {
+      if (relay.status === "ON") {
+        await toggleRelay(relay.id);
+      }
+    });
+  };
+
+  // Hàm xử lý khi toggle switch
+  const handleAutoToggle = () => {
+    if (isAutoRunning) {
+      console.log("🚀 ~ handleAutoToggle ~ isAutoRunning:", isAutoRunning);
+      stopAutoMode();
+    } else {
+      startAutoMode();
+    }
+  };
+
+  // Lấy dữ liệu relay từ server
+  // Trong component NodeControl
+  useEffect(() => {
+    const fetchRelays = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/node_control");
+
+        // Reset tất cả relay về trạng thái OFF khi load trang
+        await Promise.all(
+          response.data.data.map(async (relay) => {
+            if (relay.status === "ON") {
+              await axios.put(`http://localhost:3001/node_control/${relay.id}`, {status: "OFF"});
+            }
+          })
+        );
+
+        // Fetch lại dữ liệu sau khi reset
+        const updatedResponse = await axios.get("http://localhost:3001/node_control");
+        setRelays(updatedResponse.data.data);
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách relay:", error);
+      }
+    };
+
+    fetchRelays();
+
+    // Cleanup khi component unmount
+    return () => {
+      if (autoIntervalRef.current) {
+        clearInterval(autoIntervalRef.current);
+      }
+      // Tắt tất cả relay khi rời trang
+      relays.forEach(async (relay) => {
+        if (relay.status === "ON") {
+          await axios.put(`http://localhost:3001/node_control/${relay.id}`, {status: "OFF"});
+        }
+      });
+    };
+  }, []);
 
   return (
     <div className={cx("container", "poppins-regular")}>
@@ -39,55 +130,31 @@ const NodeControl = () => {
       <main className={cx("main")}>
         <div className={cx("buttons")}>
           <h2 className={cx("title")}>Operating parameters</h2>
-          <div className={cx("infomation")}>
-            <div className={cx("card")}>
-              <table className={cx("table")}>
-                <tbody>
-                  <tr>
-                    <th>Temperature entering the drying chamber:</th>
-                    <th className={cx("templerature")}>45°C </th>
-                  </tr>
-                  <tr>
-                    <th>Average temperature:</th>
-                    <th className={cx("pump_speed")}>60v/phút </th>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
           <div className={cx("btn")}>
             <div className={cx("controls_header")}>
-              <button
-                type="checkbox"
-                onClick={() => handleButtonClick(1)}
-                className={cx("Btn_control", "turn_auto", activeButtons[1] ? "active" : "")}
-              >
-                Chạy Auto
-              </button>
-              <button
-                type="checkbox"
-                onClick={() => handleButtonClick(2)}
-                className={cx("Btn_control", "turn_auto", activeButtons[2] ? "active" : "")}
-              >
-                Dừng Auto
-              </button>
-              <button
-                type="checkbox"
-                onClick={() => handleButtonClick(3)}
-                className={cx("Btn_control", "turn_auto", activeButtons[3] ? "active" : "")}
-              >
-                Manual
-              </button>
+              <div className={cx("btn-switch")}>
+                <label for="filter" className={cx("switch")} aria-label="Toggle Filter">
+                  <input type="checkbox" id="filter" checked={isAutoRunning} onChange={handleAutoToggle} />
+                  <span>Stop Auto</span>
+                  <span>Run Auto</span>
+                </label>
+              </div>
             </div>
             <div className={cx("controler")}>
-              <Buttons data={data} number={1} value={"Relay 1"} />
-              <Buttons data={data} number={2} value={"Relay 2"} />
-              <Buttons data={data} number={3} value={"Relay 3"} />
-              <Buttons data={data} number={4} value={"Relay 4"} />
-              <Buttons data={data} number={5} value={"Relay 5"} />
-              <Buttons data={data} number={6} value={"Relay 6"} />
-              <Buttons data={data} number={7} value={"Relay 7"} />
-              <Buttons data={data} number={8} value={"Relay 8"} />
+              {relays ? (
+                relays.map((relay) => (
+                  <Buttons
+                    key={relay.id}
+                    data={data}
+                    relay={relay}
+                    value={relay.name}
+                    toggleRelay={() => toggleRelay(relay.id)}
+                    disabled={isAutoRunning && !activeButtons[3]}
+                  />
+                ))
+              ) : (
+                <p>Đang tải dữ liệu...</p>
+              )}
             </div>
           </div>
         </div>

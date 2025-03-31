@@ -2,7 +2,8 @@ import React, {lazy, Suspense} from "react";
 import {Route, Routes} from "react-router-dom";
 import Loading from "~/components/Loading/Loading";
 import {PATH} from "~/constants/paths";
-const NodeControl = lazy(() => import("../pages/Control/NodeControl"));
+import Delayed from "~/helper/delayed";
+const NodeControl = lazy(() => Delayed(import("../pages/Control/NodeControl")), 3000);
 
 const NodeControlRoutes = () => {
   return (

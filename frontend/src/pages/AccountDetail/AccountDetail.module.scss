@@ -1,0 +1,428 @@
+.account-page {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+    "Helvetica Neue", sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.browser-tab {
+  display: flex;
+  align-items: center;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+  padding: 8px 16px;
+  gap: 12px;
+
+  .tab-controls {
+    display: flex;
+    gap: 8px;
+  }
+
+  .tab-close,
+  .tab-add {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 4px;
+
+    &:hover {
+      background-color: #e0e0e0;
+    }
+  }
+
+  .tab-title {
+    flex-grow: 1;
+  }
+
+  .tab-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .tab-action {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 4px;
+
+    &:hover {
+      background-color: #e0e0e0;
+    }
+  }
+}
+
+.promo-banner {
+  background-color: #0066ff;
+  color: white;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .promo-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .promo-text {
+    font-size: 14px;
+  }
+
+  .promo-button {
+    background-color: #000;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 500;
+
+    &:hover {
+      background-color: #333;
+    }
+  }
+
+  .close-promo {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 50%;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+.account-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin: 16px;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.account-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #eee;
+
+  .account-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .account-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .look-around-btn,
+  .invite-user-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: #0066ff;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 4px;
+
+    &:hover {
+      background-color: #f5f5f5;
+    }
+
+    .icon {
+      color: #0066ff;
+    }
+  }
+
+  .create-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: white;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 500;
+
+    &:hover {
+      background-color: #f5f5f5;
+    }
+  }
+
+  .avatar-small {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+  }
+}
+
+.account-content {
+  padding: 24px;
+}
+
+.profile-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-bottom: 24px;
+
+  .avatar-large {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+  }
+
+  .profile-actions {
+    display: flex;
+    gap: 12px;
+  }
+
+  .upload-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: white;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 4px;
+
+    &:hover {
+      background-color: #f5f5f5;
+    }
+  }
+
+  .remove-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: white;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 4px;
+
+    &:hover {
+      background-color: #f5f5f5;
+    }
+  }
+}
+
+.form-section {
+  .form-row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    &.full-width {
+      width: 100%;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #555;
+    }
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 100%;
+
+    &:focus {
+      outline: none;
+      border-color: #0066ff;
+    }
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .select-wrapper {
+    position: relative;
+
+    .ant-picker {
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      width: 100%;
+    }
+
+    .select-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: #777;
+    }
+
+    select {
+      appearance: none;
+      padding-right: 30px;
+    }
+
+    // DateInput.scss
+    .date-input-container {
+      position: relative;
+      width: 100%;
+
+      .date-input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        font-family: "Arial", sans-serif;
+        color: #000;
+        transition: border-color 0.3s ease;
+
+        &:focus {
+          outline: none;
+          border-color: #0066ff;
+        }
+
+        &::placeholder {
+          color: #bdbdbd;
+          opacity: 1;
+        }
+
+        /* Ẩn mũi tên spin trong trình duyệt Webkit */
+        &::-webkit-inner-spin-button,
+        &::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+      }
+    }
+  }
+
+  .current-time {
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 10px;
+    color: #777;
+    font-size: 14px;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .save-btn {
+    background-color: #0066ff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #0052cc;
+    }
+  }
+
+  .cancel-btn {
+    background-color: white;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #f5f5f5;
+    }
+  }
+
+  .delete-btn {
+    background-color: #cc0000;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-left: auto;
+
+    &:hover {
+      background-color: #aa0000;
+    }
+  }
+}
+
+.logo-icon {
+  font-size: 24px;
+}

@@ -6,20 +6,8 @@ import styles from "./Chart.module.scss";
 const cx = classNames.bind(styles);
 
 const Chart = ({data}) => {
-  console.log("🚀 ~ Chart ~ data:", data);
   const filteredData = [];
   let prevTime = null;
-
-  const mappedData = [
-    ...(Array.isArray(data)
-      ? data.map((item) => ({
-          name: item.time,
-          Temperature: item.temperature,
-          Humidity: item.humidity,
-        }))
-      : []),
-  ];
-  console.log("🚀 ~ Chart ~ mappedData:", mappedData);
 
   if (Array.isArray(data)) {
     data.forEach((item) => {
@@ -36,18 +24,6 @@ const Chart = ({data}) => {
       }
     });
   }
-
-  // const mappedData = [
-  //   ...(Array.isArray(data)
-  //     ? data.map((item) => ({
-  //         name: item.time,
-  //         Temperature: item.temperature,
-  //         Humidity: item.humidity,
-  //       }))
-  //     : []),
-  // ];
-
-  console.log(filteredData);
 
   const CustomTooltip = ({active, payload, label}) => {
     if (active && payload && payload.length) {
@@ -75,8 +51,8 @@ const Chart = ({data}) => {
   return (
     <div style={{width: "", height: "600px", margin: "20px 0"}}>
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={mappedData.splice(0, 20)}>
-          {/* <LineChart data={filteredData.splice(0, 20)}> */}
+        {/* <LineChart data={mappedData.splice(0, 20)}> */}
+        <LineChart data={filteredData.splice(filteredData.length - 21, filteredData.length - 1)}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" padding={{left: 30, right: 30}} tick={{fontSize: 14}} />
           <YAxis />

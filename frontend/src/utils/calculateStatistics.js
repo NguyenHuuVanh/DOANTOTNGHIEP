@@ -56,15 +56,16 @@ const calculateStatistics = (arr) => {
   const standardDeviation = Math.sqrt(variance);
 
   const meanDeviation = arr.reduce((sum, val) => sum + Math.abs(val - average), 0) / arr.length;
+  const modeAvenre = mode.reduce((sum, val) => sum + val, 0) / mode.length;
 
   return {
     Minimum: min,
     Maximum: max,
     Average: average.toFixed(2),
     Median: median,
-    Mode: mode,
-    Range: range,
-    InterquartileRange: iqr,
+    Mode: modeAvenre.toFixed(2),
+    Range: range.toFixed(2),
+    InterquartileRange: iqr.toFixed(2),
     StandardDeviation: standardDeviation.toFixed(2),
     MeanDeviation: meanDeviation.toFixed(2),
   };

@@ -1,124 +1,184 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import classNames from "classnames/bind";
 import styles from "./deviceStatistics.module.scss";
 import {DatePicker, Space, TimePicker} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import dayjs from "dayjs";
 import {faFilter} from "@fortawesome/free-solid-svg-icons";
 import * as XLSX from "xlsx";
 import {saveAs} from "file-saver";
-import {fetchNodeData} from "~/apis/nodeData";
 import sortedData from "~/utils/sortData";
-import {averageRounded} from "~/utils/averageNumbers";
 import calculateStatistics from "~/utils/calculateStatistics";
 import {TIMEPARAMS} from "~/constants/times";
+import useFetchData from "~/hooks/useFetchData";
+import moment from "moment";
+import BarChartComponents from "../BarChart/BarChart";
+import notify from "~/utils/toastify";
+import {VARIABLES} from "~/constants/variables";
+import {filterDataByDateTime} from "~/helper/filterHelper";
 
 const cx = classNames.bind(styles);
 const {RangePicker} = DatePicker;
 
 const DeviceStatistics = () => {
-  const devices = ["Node 1", "Node 2"];
+  const devices = VARIABLES.NODES;
   const [selectedDevice, setSelectedDevice] = useState(devices[0]);
   const [allDevices, setAllDevices] = useState(false);
   const [dataNodes, setDataNodes] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  console.log("🚀 ~ DeviceStatistics ~ filteredData:", filteredData);
-  const [startDate, setStartDate] = useState("");
-  const [startTimeValue, setStarTimeValue] = useState("00:00");
-  const [endDate, setEndDate] = useState("");
-  const [endTimeValue, setEndTimeValue] = useState("23:59");
+  const [dateRange, setDateRange] = useState([null, null]);
+  console.log("🚀 ~ DeviceStatistics ~ dateRange:", dateRange);
+  const [timeRange, setTimeRange] = useState([TIMEPARAMS.BEGIN, TIMEPARAMS.END]);
+  const {data: dataNode, error: errorData, loading: loadingData} = useFetchData("/node_data"); // Gọi custom hook
 
-  const getData = async () => {
+  const processData = (data, nodeName) => {
+    return data.map((item) => {
+      const time = item.created_at;
+      const date = item.created_at;
+      return {
+        node: nodeName,
+        temperature: item.temperature,
+        humidity: item.humidity,
+        time: moment(time).format("HH:mm"),
+        date: moment(date).format("DD-MM-YYYY"),
+      };
+    });
+  };
+
+  const fetchData = async () => {
     try {
-      const response = await fetchNodeData();
-      const dataNode = response.node1;
-      if (dataNode) {
-        const dataNodeFilterd = dataNode.map((item) => {
-          const time = item.created_at.split(" ")[1].slice(0, 5);
-          const date = item.created_at.split(" ")[0];
-          return {
-            temperature: item.temperature,
-            humidity: item.humidity,
-            time: `${time}`,
-            date: `${date}`,
-          };
-        });
-
-        const dataSorted = sortedData(dataNodeFilterd);
-        console.log("🚀 ~ getData ~ dataSorted:", dataSorted);
-
-        setDataNodes(dataSorted);
-        setFilteredData(dataSorted);
-      } else {
-        console.error("API không trả về dữ liệu node1.");
+      if (loadingData === false && dataNode) {
+        if (allDevices) {
+          const dataNode1 = dataNode?.node1 || [];
+          const dataNode2 = dataNode?.node2 || [];
+          const processedDataNode1 = processData(dataNode1, "Node 1");
+          const processedDataNode2 = processData(dataNode2, "Node 2");
+          const combinedData = [...processedDataNode1, ...processedDataNode2];
+          const sorted = sortedData(combinedData);
+          setDataNodes(sorted);
+          setFilteredData(sorted); // ✅ Dùng biến sorted trực tiếp
+        } else {
+          const nodeKey = selectedDevice.toLowerCase().replace(" ", "");
+          const data = dataNode?.[nodeKey] || [];
+          const processedData = processData(data, selectedDevice);
+          const sorted = sortedData(processedData);
+          setDataNodes(sorted);
+          setFilteredData(sorted); // ✅ Fix tương tự
+        }
       }
     } catch (error) {
       console.error("Lỗi khi gọi API: ", error);
     }
   };
 
-  const onRangeDateChange = (dates, dateStrings) => {
-    if (dates) {
-      setStartDate(dateStrings[0]);
-      setEndDate(dateStrings[1]);
-    } else {
-      console.log("Clear");
-      getData();
+  // Xử lý thay đổi ngày
+  const handleDateChange = (dates) => {
+    if (!dates || dates.length < 2 || !dates[0] || !dates[1]) {
+      setDateRange([null, null]);
+      return;
     }
+
+    const formattedDates = dates.map((d) => d.format("DD-MM-YYYY")); // ← chuyển về chuỗi "24-12-2024"
+
+    setDateRange(formattedDates); // ← kết quả là mảng string ["24-12-2024", "24-12-2024"]
   };
 
-  const onRangeTimeChange = (times, timesStrings) => {
-    if (times) {
-      console.log("🚀 ~ Node1 ~ times:", timesStrings);
-      setStarTimeValue(timesStrings[0]);
-      setEndTimeValue(timesStrings[1]);
-    } else {
-      getData();
+  // Xử lý thay đổi giờ
+  const handleTimeChange = (times) => {
+    if (!times || times.length < 2 || !times[0] || !times[1]) {
+      setTimeRange([TIMEPARAMS.BEGIN, TIMEPARAMS.END]); // hoặc giá trị mặc định bạn muốn
+      return;
     }
+
+    const formattedTimes = times.map((t) => t.format("HH:mm")); // ← chuyển về chuỗi giờ
+    setTimeRange(formattedTimes); // → ["09:00", "18:00"]
   };
 
   const handleFilter = () => {
-    if (startDate && endDate) {
-      const filtered = dataNodes.filter((item) => {
-        const itemDateTime = new Date(`${item.date}T${item.time}`);
-        const startDateTime = new Date(`${startDate}T${startTimeValue}`);
-        const endDateTime = new Date(`${endDate}T${endTimeValue}`);
-        return itemDateTime >= startDateTime && itemDateTime <= endDateTime;
-      });
+    try {
+      const filtered = filterDataByDateTime(dataNodes, dateRange, timeRange);
+
+      if (filtered.length === 0) {
+        notify.warning("⚠️ Không tìm thấy dữ liệu trong khoảng thời gian đã chọn.");
+      } else {
+        notify.success(`✅ Đã tìm thấy ${filtered.length} bản ghi.`);
+      }
+
       setFilteredData(filtered);
-    } else {
-      setFilteredData(dataNodes);
+    } catch (error) {
+      notify.error(error.message || "Lỗi hệ thống khi lọc dữ liệu");
     }
   };
 
   const calculateParameters = () => {
-    // Nếu `filteredData` không rỗng, dùng nó; nếu rỗng, dùng `dataNodes`
     const dataToCalculate = filteredData && filteredData.length > 0 ? filteredData : dataNodes;
 
+    // Kiểm tra dữ liệu đầu vào
     if (!dataToCalculate || dataToCalculate.length === 0) {
       console.warn("No valid data available for calculations.");
-      return {
-        calculateTemp: null,
-        calculateHumi: null,
-      };
+      return {calculateTemp: null, calculateHumi: null};
     }
 
-    // Lọc dữ liệu hợp lệ trước khi tính toán
-    const temperatureArray = dataToCalculate
-      .map((item) => item.temperature)
-      .filter((temp) => typeof temp === "number" && !isNaN(temp));
-
-    const humidityArray = dataToCalculate
-      .map((item) => item.humidity)
-      .filter((hum) => typeof hum === "number" && !isNaN(hum));
-
-    return {
-      calculateTemp: temperatureArray.length > 0 ? calculateStatistics(temperatureArray) : null,
-      calculateHumi: humidityArray.length > 0 ? calculateStatistics(humidityArray) : null,
-    };
+    // Trường hợp tích "All Devices"
+    if (allDevices) {
+      const result = {};
+      devices.forEach((node) => {
+        const nodeData = dataToCalculate.filter((item) => item.node === node);
+        const temperatureArray = nodeData
+          .map((item) => item.temperature)
+          .filter((temp) => typeof temp === "number" && !isNaN(temp));
+        const humidityArray = nodeData
+          .map((item) => item.humidity)
+          .filter((hum) => typeof hum === "number" && !isNaN(hum));
+        result[node] = {
+          calculateTemp: temperatureArray.length > 0 ? calculateStatistics(temperatureArray) : null,
+          calculateHumi: humidityArray.length > 0 ? calculateStatistics(humidityArray) : null,
+        };
+      });
+      return result;
+    } else {
+      // Trường hợp chọn một node cụ thể
+      const temperatureArray = dataToCalculate
+        .map((item) => item.temperature)
+        .filter((temp) => typeof temp === "number" && !isNaN(temp));
+      const humidityArray = dataToCalculate
+        .map((item) => item.humidity)
+        .filter((hum) => typeof hum === "number" && !isNaN(hum));
+      return {
+        calculateTemp: temperatureArray.length > 0 ? calculateStatistics(temperatureArray) : null,
+        calculateHumi: humidityArray.length > 0 ? calculateStatistics(humidityArray) : null,
+      };
+    }
   };
 
-  // console.log("🚀 ~ calculateParameters ~ calculateParameters:", calculateParameters());
+  const dataTable = calculateParameters() ?? {};
+  let data = {Temperature: {name: [], value: []}, Humidity: {name: [], value: []}};
+  if (allDevices) {
+    data = devices.reduce(
+      (acc, node) => {
+        const nodeData = dataTable[node] || {};
+        acc.Temperature.name = Object.keys(nodeData?.calculateTemp || {});
+        acc.Temperature.value = Object.values(nodeData?.calculateTemp || {});
+        acc.Humidity.name = Object.keys(nodeData?.calculateHumi || {});
+        acc.Humidity.value = Object.values(nodeData?.calculateHumi || {});
+        return acc;
+      },
+      {Temperature: {name: [], value: []}, Humidity: {name: [], value: []}}
+    );
+  } else {
+    const temp = dataTable?.calculateTemp ?? {};
+    const humi = dataTable?.calculateHumi ?? {};
+
+    data = {
+      Temperature: {
+        name: Object.keys(temp),
+        value: Object.values(temp),
+      },
+      Humidity: {
+        name: Object.keys(humi),
+        value: Object.values(humi),
+      },
+    };
+  }
 
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(dataNodes);
@@ -131,8 +191,8 @@ const DeviceStatistics = () => {
   };
 
   useEffect(() => {
-    getData();
-  }, []);
+    fetchData();
+  }, [loadingData, dataNode, errorData, selectedDevice, allDevices, dateRange, timeRange]);
 
   return (
     <div className={cx("container")}>
@@ -161,17 +221,18 @@ const DeviceStatistics = () => {
         <h3 className={cx("title")}>Filter time:</h3>
         <div className={cx("filter")}>
           <div className={cx("filter_location")}>
-            <Space direction="vertical" size={12}>
-              <RangePicker
-                presets={TIMEPARAMS.rangePresets}
-                onChange={onRangeDateChange}
-                style={{width: "100%", borderRadius: "2px"}}
-              />
-            </Space>
+            <RangePicker
+              presets={TIMEPARAMS.rangePresets}
+              format="DD-MM-YYYY"
+              onChange={handleDateChange}
+              style={{width: "100%", borderRadius: "2px"}}
+              disabledDate={(current) => current > moment().endOf("day")}
+            />
             <TimePicker.RangePicker
               defaultValue={[TIMEPARAMS.startTime, TIMEPARAMS.endTime]}
-              format={TIMEPARAMS.format}
-              onChange={onRangeTimeChange}
+              format="HH:mm"
+              onChange={handleTimeChange}
+              disabled={!dateRange || !dateRange[0] || !dateRange[1]} // Chỉ kích hoạt khi người dùng chọn ngày
               style={{width: "100%", borderRadius: "2px"}}
             />
           </div>
@@ -185,54 +246,60 @@ const DeviceStatistics = () => {
           </div>
         </div>
       </div>
-      {filteredData && (
+
+      {filteredData ? (
         <table className={cx("statistics-table")}>
           <thead>
             <tr>
               <th>Devices</th>
               <th>Types</th>
-              <th>Minimum</th>
-              <th>Maximum</th>
-              <th>Average</th>
-              <th>Median</th>
-              <th>Mode</th>
-              <th>Range</th>
-              <th>InterquartileRange</th>
-              <th>StandardDeviation</th>
-              <th>MeanDeviation</th>
+              {(data.Temperature.name.length > 0 ? data.Temperature.name : ["Min", "Max", "Avg", "Std"]).map((item) => (
+                <th key={item}>{item}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>{devices[0]}</td>
-              <td>Temperature</td>
-              <td>{calculateParameters()?.calculateTemp?.Minimum ?? "N/A"}</td>
-              <td>{calculateParameters()?.calculateTemp?.Maximum ?? "N/A"}</td>
-              <td>{calculateParameters()?.calculateTemp?.Average ?? "N/A"}</td>
-              <td>{calculateParameters()?.calculateTemp?.Median ?? "N/A"}</td>
-              <td>{calculateParameters()?.calculateTemp?.Mode ?? "N/A"}</td>
-              <td>{calculateParameters()?.calculateTemp?.Range ?? "N/A"}</td>
-              <td>{calculateParameters()?.calculateTemp?.InterquartileRange ?? "N/A"}</td>
-              <td>{calculateParameters()?.calculateTemp?.StandardDeviation ?? "N/A"}</td>
-              <td>{calculateParameters()?.calculateTemp?.MeanDeviation ?? "N/A"}</td>
-            </tr>
-            <tr>
-              <td>{devices[0]}</td>
-              <td>Humidity</td>
-              <td>{calculateParameters()?.calculateHumi?.Minimum ?? "N/A"}</td>
-              <td>{calculateParameters()?.calculateHumi?.Maximum ?? "N/A"}</td>
-              <td>{calculateParameters()?.calculateHumi?.Average ?? "N/A"}</td>
-              <td>{calculateParameters()?.calculateHumi?.Median ?? "N/A"}</td>
-              <td>{calculateParameters()?.calculateHumi?.Mode ?? "N/A"}</td>
-              <td>{calculateParameters()?.calculateHumi?.Range ?? "N/A"}</td>
-              <td>{calculateParameters()?.calculateHumi?.InterquartileRange ?? "N/A"}</td>
-              <td>{calculateParameters()?.calculateHumi?.StandardDeviation ?? "N/A"}</td>
-              <td>{calculateParameters()?.calculateHumi?.MeanDeviation ?? "N/A"}</td>
-            </tr>
+            {allDevices ? (
+              devices.map((device) => (
+                <React.Fragment key={device}>
+                  <tr>
+                    <td rowSpan={2}>{device}</td>
+                    <td>Temperature</td>
+                    {dataTable[device]?.calculateTemp
+                      ? Object.values(dataTable[device].calculateTemp).map((item) => <td key={item}>{item}</td>)
+                      : data.Temperature.value.map((item) => <td key={item}>-</td>)}
+                  </tr>
+                  <tr>
+                    <td>Humidity</td>
+                    {dataTable[device]?.calculateHumi
+                      ? Object.values(dataTable[device].calculateHumi).map((item) => <td key={item}>{item}</td>)
+                      : data.Humidity.value.map((item) => <td key={item}>-</td>)}
+                  </tr>
+                </React.Fragment>
+              ))
+            ) : (
+              <>
+                <tr>
+                  <td rowSpan={2}>{selectedDevice}</td>
+                  <td>Temperature</td>
+                  {dataTable.calculateTemp
+                    ? Object.values(dataTable.calculateTemp).map((item) => <td key={item}>{item}</td>)
+                    : data.Temperature.value.map((item) => <td key={item}>-</td>)}
+                </tr>
+                <tr>
+                  <td>Humidity</td>
+                  {dataTable.calculateHumi
+                    ? Object.values(dataTable.calculateHumi).map((item) => <td key={item}>{item}</td>)
+                    : data.Humidity.value.map((item) => <td key={item}>-</td>)}
+                </tr>
+              </>
+            )}
           </tbody>
         </table>
+      ) : (
+        <p style={{textAlign: "center", fontStyle: "italic"}}>Không có dữ liệu phù hợp</p>
       )}
-
+      <BarChartComponents data={dataTable} allDevices={allDevices} devices={devices} />
       <button className={cx("export-button")} onClick={exportToExcel}>
         Send To Excel
       </button>

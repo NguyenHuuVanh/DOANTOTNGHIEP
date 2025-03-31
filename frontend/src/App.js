@@ -1,12 +1,18 @@
+import {ToastContainer} from "react-toastify";
 import "./App.css";
-import Main from "./pages/Node/Node1";
-import ColumnLine from "./components/chart/Chart";
-import Home from "./pages/Home/Home";
-// import {Route, Routes} from "react-router-dom";
+import {AuthProvider} from "./context/AuthContext";
 import Routes from "./routes/routes";
+import AppRoutes from "./routes/routes";
 
 function App() {
-  return <div className="App">{<Routes />}</div>;
+  return (
+    <AuthProvider>
+      <div className="App">
+        <AppRoutes />
+        <ToastContainer />
+      </div>
+    </AuthProvider>
+  );
 }
 
 export default App;

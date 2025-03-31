@@ -1,0 +1,103 @@
+.footer {
+  background-color: #e9ebf5;
+  width: 100%;
+  background-color: #1e2541;
+}
+.footer-content {
+  max-width: 1400px;
+  padding: 40px;
+  display: flex;
+  justify-content: center;
+  flex-flow: row;
+  gap: 2rem;
+  margin: 0 auto;
+}
+.footer-section {
+  width: 100%;
+}
+.footer .section-title {
+  color: #fff;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.footer .section-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.footer .section-list li {
+  color: #fff;
+  margin-bottom: 0.8rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  font-size: 1.4rem;
+}
+.footer .section-list li:hover {
+  color: #3498db;
+}
+.footer .newsletter-section {
+  grid-column: span 2;
+}
+.footer .newsletter-section .newsletter-form {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.footer .newsletter-section .newsletter-form input {
+  flex: 1;
+  padding: 8px 16px;
+  width: 200px;
+  border: 1px solid #ecf0f1;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+.footer .newsletter-section .newsletter-form .subscribe-btn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+.footer .newsletter-section .newsletter-form .subscribe-btn:hover {
+  background-color: #217dbb;
+}
+.footer .newsletter-section .follow-us {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid #ecf0f1;
+}
+.footer .newsletter-section .follow-us span {
+  color: #fff;
+  font-weight: bold;
+  font-size: 1rem;
+}
+.footer .newsletter-section .follow-us .social-icons {
+  display: flex;
+  gap: 1.5rem;
+  color: #fff;
+}
+.footer .newsletter-section .follow-us .social-icons svg {
+  cursor: pointer;
+  transition: color 0.3s ease;
+  font-size: 1.8rem;
+  color: #fff;
+}
+.footer .newsletter-section .follow-us .social-icons svg:hover {
+  color: #3498db;
+}
+@media (max-width: 768px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+  }
+  .footer .newsletter-section {
+    grid-column: span 1;
+  }
+}/*# sourceMappingURL=Footer.module.css.map */

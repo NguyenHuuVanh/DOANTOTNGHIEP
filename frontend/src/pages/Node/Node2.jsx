@@ -2,88 +2,197 @@ import React, {useEffect, useState} from "react";
 import classNames from "classnames/bind";
 import styles from "./main.module.scss";
 import Chart from "../../components/chart/Chart";
-import History from "../../components/History/History";
-import Buttons from "../../components/Buttons/Buttons";
 import svgs from "~/assets/svgs";
 import * as XLSX from "xlsx";
 import {saveAs} from "file-saver";
-import {getDatabase, ref, child, get} from "firebase/database";
-// import {dbRef} from "../../components/firebase/config";
-import axios from "axios";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faBars, faFilter, faMagnifyingGlass} from "@fortawesome/free-solid-svg-icons";
+import {faFilter} from "@fortawesome/free-solid-svg-icons";
 import {DatePicker, TimePicker, Space} from "antd";
-import Offcanvas from "react-bootstrap/Offcanvas";
-import Button from "react-bootstrap/Button";
-import dayjs from "dayjs";
 import images from "~/assets/images";
 import sortedData from "~/utils/sortData";
-import {fetchNodeData} from "~/apis/nodeData";
 import {averageRounded} from "~/utils/averageNumbers";
+import Loader from "~/components/Loading/Loading";
+import notify from "~/utils/toastify";
+import {TIMEPARAMS} from "~/constants/times";
+import moment from "moment";
+import useFetchData from "~/hooks/useFetchData";
 const format = "HH:mm";
 const {RangePicker} = DatePicker;
-// import RangePickerDate from "../RangeDatePicker/RangePicker";
-// import RangeTimePicker from "../RangeTimePicker/RangeTimePicker";
 
 const cx = classNames.bind(styles);
 
-const Node1 = ({data}) => {
+const Node2 = ({data}) => {
   const [dataNodes, setDataNodes] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [startDate, setStartDate] = useState("");
-  const [startTimeValue, setStarTimeValue] = useState("00:00");
-  const [endDate, setEndDate] = useState("");
-  const [endTimeValue, setEndTimeValue] = useState("23:59");
-  const [show, setShow] = useState(false);
-  console.log("🚀 ~ Node1 ~ filteredData:", filteredData);
+  // const [startDate, setStartDate] = useState("");
+  // const [endDate, setEndDate] = useState("");
+  // const [startTimeValue, setStarTimeValue] = useState(TIMEPARAMS.BEGIN);
+  // const [endTimeValue, setEndTimeValue] = useState(TIMEPARAMS.END);
+  const [dateRange, setDateRange] = useState([null, null]);
+  const [timeRange, setTimeRange] = useState([TIMEPARAMS.BEGIN, TIMEPARAMS.END]);
+  const [error, setError] = useState(null);
+  const {data: dataNode, error: errorData, loading: loadingData} = useFetchData("/node_data"); // Gọi custom hook
 
-  const startTime = dayjs("00:00", "HH:mm");
-  const endTime = dayjs("00:00", "HH:mm");
+  const processData = (data) => {
+    const dataNodeFilterd = data.map((item) => {
+      const time = item.created_at;
+      const date = item.created_at;
+      return {
+        temperature: item.temperature,
+        humidity: item.humidity,
+        time: moment(time).format("HH:mm"),
+        date: moment(date).format("DD-MM-YYYY"),
+      };
+    });
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+    const dataSorted = sortedData(dataNodeFilterd);
+    setDataNodes(dataSorted);
+    setFilteredData(dataSorted);
+  };
 
-  // const getData = () => {
-  //   axios
-  //     .get("http://localhost:3001/data_sensor")
-  //     .then((response) => {
-  //       setDataNodes(response.data.data.node1);
-  //     })
-  //     .then((error) => {
-  //       console.log(error);
-  //     });
-  // };
-
-  const getData = async () => {
+  const fetchData = async () => {
     try {
-      // const response = await axios.get("http://localhost:3001/node_data");
-      const response = await fetchNodeData();
-      const dataNode = response.node2;
-      if (dataNode) {
-        const dataNodeFilterd = dataNode.map((item) => {
-          const time = item.created_at.split(" ")[1].slice(0, 5);
-          const date = item.created_at.split(" ")[0];
-          return {
-            temperature: item.temperature,
-            humidity: item.humidity,
-            time: `${time}`,
-            date: `${date}`,
-          };
-        });
-
-        const dataSorted = sortedData(dataNodeFilterd);
-        console.log("🚀 ~ getData ~ dataSorted:", dataSorted);
-
-        setDataNodes(dataSorted);
-        setFilteredData(dataSorted);
-      } else {
-        console.error("API không trả về dữ liệu node1.");
+      if (loadingData === false && dataNode) {
+        const data = await dataNode?.node2;
+        if (data) {
+          processData(data);
+        } else {
+          setError("API không trả về dữ liệu node1.");
+          loadingData(false);
+        }
+      }
+      if (errorData) {
+        setError("Lỗi khi tải dữ liệu");
+        loadingData(false);
       }
     } catch (error) {
       console.error("Lỗi khi gọi API: ", error);
+      setError("Lỗi khi gọi API");
+      loadingData(false);
     }
   };
 
+  // const onRangeDateChange = (dates, dateStrings) => {
+  //   if (dates) {
+  //     setStartDate(dateStrings[0]);
+  //     setEndDate(dateStrings[1]);
+  //   } else {
+  //     console.log("Clear");
+  //     fetchData();
+  //   }
+  // };
+
+  // const onRangeTimeChange = (times, timesStrings) => {
+  //   if (times) {
+  //     console.log("🚀 ~ Node1 ~ times:", timesStrings);
+  //     setStarTimeValue(timesStrings[0]);
+  //     setEndTimeValue(timesStrings[1]);
+  //   } else {
+  //     fetchData();
+  //   }
+  // };
+
+  // const handleFilter = () => {
+  //   if (!startDate || !endDate) {
+  //     setFilteredData(dataNodes);
+  //     return;
+  //   }
+
+  //   const filtered = dataNodes.filter((item) => {
+  //     const itemTime = moment(`${item.date}T${item.time}`);
+  //     const start = moment(`${startDate}T${startTimeValue}`);
+  //     const end = moment(`${endDate}T${endTimeValue}`);
+  //     return itemTime.isBetween(start, end, null, "[]");
+  //   });
+
+  //   setFilteredData(filtered);
+  // };
+
+  // Xử lý thay đổi ngày
+  const handleDateChange = (dates, dateStrings) => {
+    setDateRange(dates);
+
+    // Reset time khi ngày thay đổi
+    if (!dates) {
+      setTimeRange([TIMEPARAMS.BEGIN, TIMEPARAMS.END]);
+    }
+  };
+
+  // Xử lý thay đổi giờ
+  const handleTimeChange = (times, timeStrings) => {
+    setTimeRange(times);
+  };
+
+  const handleFilter = () => {
+    try {
+      // Kiểm tra ngày và giờ có hợp lệ không
+      if (!dateRange || dateRange.filter(Boolean).length < 2) {
+        notify.error("Vui lòng chọn khoảng ngày");
+        return;
+      }
+
+      if (!timeRange || timeRange.filter(Boolean).length < 2) {
+        notify.error("Vui lòng chọn khoảng thời gian");
+        return;
+      }
+
+      const [startDateObj, endDateObj] = dateRange;
+      const [startTimeStr, endTimeStr] = timeRange;
+
+      // Tạo moment object với timezone
+      const createMoment = (date, time) =>
+        moment(`${moment(date).format("YYYY-MM-DD")}T${time}`, "YYYY-MM-DDTHH:mm", true);
+
+      const start = createMoment(startDateObj, startTimeStr);
+      const end = createMoment(endDateObj, endTimeStr);
+
+      if (!start.isValid() || !end.isValid()) {
+        throw new Error("Thời gian không hợp lệ");
+      }
+
+      if (start.isAfter(end)) {
+        notify.error("Thời gian bắt đầu phải trước thời gian kết thúc");
+        return;
+      }
+
+      // Lọc dữ liệu với boundary check
+      const filtered = dataNodes.filter((item) => {
+        const itemTime = moment(`${item.date}T${item.time}`, "YYYY-MM-DDTHH:mm", true);
+
+        return itemTime.isBetween(start, end, "minutes", "[]");
+      });
+
+      setFilteredData(filtered.length > 0 ? filtered : []);
+      notify.success(`Tìm thấy ${filtered.length} bản ghi`);
+    } catch (error) {
+      console.error("Lỗi lọc dữ liệu:", error);
+      notify.error(error.message || "Lỗi khi lọc dữ liệu");
+    }
+  };
+
+  // Hàm tính nhiệt độ và độ ẩm trung bình
+  const averageTemperatureAndHumidity = () => {
+    if (!dataNodes.length) return {temperature: 0, humidity: 0};
+
+    const validTemps = dataNodes
+      .slice(0, 20)
+      .map((item) => item.temperature)
+      .filter((temp) => typeof temp === "number" && !isNaN(temp));
+
+    const validHumidity = dataNodes
+      .slice(0, 20)
+      .map((item) => item.humidity)
+      .filter((humidity) => typeof humidity === "number" && !isNaN(humidity));
+
+    if (!validTemps.length || !validHumidity.length) return {temperature: 0, humidity: 0};
+
+    const averageTemperature = Math.round(averageRounded(validTemps));
+    const averageHumidity = Math.round(averageRounded(validHumidity));
+
+    return {temperature: averageTemperature, humidity: averageHumidity};
+  };
+
+  // Hàm export file Excel
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(dataNodes);
     const workbook = XLSX.utils.book_new();
@@ -93,105 +202,21 @@ const Node1 = ({data}) => {
     saveAs(dataBlob, "UsersData.xlsx");
   };
 
-  const onRangeDateChange = (dates, dateStrings) => {
-    if (dates) {
-      setStartDate(dateStrings[0]);
-      setEndDate(dateStrings[1]);
-    } else {
-      console.log("Clear");
-      getData();
-    }
-  };
-
-  const onRangeTimeChange = (times, timesStrings) => {
-    if (times) {
-      console.log("🚀 ~ Node1 ~ times:", timesStrings);
-      setStarTimeValue(timesStrings[0]);
-      setEndTimeValue(timesStrings[1]);
-    } else {
-      getData();
-    }
-  };
-  const rangePresets = [
-    {
-      label: "Last 7 Days",
-      value: [dayjs().add(-7, "d"), dayjs()],
-    },
-    {
-      label: "Last 14 Days",
-      value: [dayjs().add(-14, "d"), dayjs()],
-    },
-    {
-      label: "Last 30 Days",
-      value: [dayjs().add(-30, "d"), dayjs()],
-    },
-    {
-      label: "Last 90 Days",
-      value: [dayjs().add(-90, "d"), dayjs()],
-    },
-  ];
-
-  //firebase
-  // const fetchData = () => {
-  //   get(child(dbRef, "/"))
-  //     .then((snapshot) => {
-  //       if (snapshot.exists()) {
-  //         console.log("Data:", snapshot.val());
-  //         setData(snapshot.val());
-  //       } else {
-  //         console.log("No data available");
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching data:", error);
-  //     });
-  // };
-
   const handleExport = () => {
     exportToExcel();
   };
 
-  const handleFilter = () => {
-    if (startDate && endDate) {
-      const filtered = dataNodes.filter((item) => {
-        console.log("🚀 ~ filtered ~ item:", item);
-        const itemDateTime = new Date(`${item.date}T${item.time}`);
-        const startDateTime = new Date(`${startDate}T${startTimeValue}`);
-        const endDateTime = new Date(`${endDate}T${endTimeValue}`);
-        return itemDateTime >= startDateTime && itemDateTime <= endDateTime;
-      });
-      setFilteredData(filtered);
-    } else {
-      setFilteredData(dataNodes);
-    }
-  };
-
-  const averageTemperature = () => {
-    if (!Array.isArray(dataNodes) || dataNodes.length === 0) {
-      console.error("dataNodes is not a valid array or is empty.");
-      return null;
-    }
-
-    const data = dataNodes
-      .slice(0, 20)
-      .map((item) => item?.temperature)
-      .filter((temp) => typeof temp === "number" && !isNaN(temp)); // Lọc giá trị hợp lệ
-
-    console.log("🚀 ~ averageTemperature ~ data:", data);
-
-    if (data.length === 0) {
-      console.error("No valid temperatures found.");
-      return null;
-    }
-
-    return Math.round(averageRounded(data));
-  };
-
-  console.log(averageTemperature());
-
   useEffect(() => {
-    getData();
-  }, []);
+    fetchData();
+  }, [loadingData, dataNode, errorData]);
+
+  if (loadingData) {
+    <Loader />;
+  }
+  if (error) {
+    return <div className={cx("error")}>Error: {error}</div>;
+  }
+
   return (
     <>
       <div className={cx("container", "poppins-regular")}>
@@ -216,7 +241,7 @@ const Node1 = ({data}) => {
                     </tr>
                     <tr>
                       <th>Average temperature:</th>
-                      <th className={cx("pump_speed")}>{averageTemperature()}°C</th>
+                      <th className={cx("pump_speed")}>{averageTemperatureAndHumidity().temperature}°C</th>
                     </tr>
                   </tbody>
                 </table>
@@ -226,15 +251,17 @@ const Node1 = ({data}) => {
               <div className={cx("filter_location")}>
                 <Space direction="vertical" size={12}>
                   <RangePicker
-                    presets={rangePresets}
-                    onChange={onRangeDateChange}
+                    presets={TIMEPARAMS.rangePresets}
+                    onChange={handleDateChange}
                     style={{width: "100%", borderRadius: "2px"}}
+                    disabledDate={(current) => current > moment().endOf("day")}
                   />
                 </Space>
                 <TimePicker.RangePicker
-                  defaultValue={[startTime, endTime]}
+                  defaultValue={[TIMEPARAMS.startTime, TIMEPARAMS.endTime]}
                   format={format}
-                  onChange={onRangeTimeChange}
+                  onChange={handleTimeChange}
+                  disabled={!dateRange}
                   style={{width: "100%", borderRadius: "2px"}}
                 />
               </div>
@@ -299,4 +326,4 @@ const Node1 = ({data}) => {
   );
 };
 
-export default Node1;
+export default Node2;

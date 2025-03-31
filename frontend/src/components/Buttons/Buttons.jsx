@@ -1,42 +1,37 @@
-import React, {useState} from "react";
+import React, {memo, useEffect, useState} from "react";
 import classNames from "classnames/bind";
 import styles from "./Buttons.module.scss";
-import {getDatabase, ref, set} from "firebase/database";
-// import {dbRef} from "../firebase/config";
+import axios from "axios";
 
 const cx = classNames.bind(styles);
 
-const Buttons = ({value, data, number}) => {
-  const [checked, setChecked] = useState(false);
+const Buttons = memo(({value, relay, toggleRelay, disabled}) => {
+  const [isActive, setIsActive] = useState(false);
 
-  const updateData = (relayValue) => {
-    const db = getDatabase();
-    const relayRef = ref(db, `/RELAY ${number}`);
-    set(relayRef, relayValue)
-      .then(() => {
-        console.log("Data updated successfully!");
-      })
-      .catch((error) => {
-        console.error("Error updating data:", error);
-      });
-  };
+  // Đặt isActive về false khi component được mount lần đầu
+  useEffect(() => {
+    setIsActive(false);
+  }, []); // Dependency rỗng, chỉ chạy một lần khi mount
 
-  const switchControl = (e) => {
-    const isChecked = e.target.checked;
-    if (isChecked) {
-      console.log("Bật");
-      updateData(1);
-    } else {
-      console.log("tắt");
-      updateData(0);
+  useEffect(() => {
+    setIsActive(relay.status === "ON");
+  }, [relay.status]); // Theo dõi thay đổi từ prop
+
+  const handleToggle = async () => {
+    if (!disabled) {
+      try {
+        await toggleRelay();
+        // Không cần setState ở đây vì sẽ nhận prop mới từ parent
+      } catch (error) {
+        console.error("Lỗi khi chuyển trạng thái:", error);
+      }
     }
   };
-
   return (
     <div className={cx("container")}>
       <label className={cx("switch")}>
-        <input type="checkbox" onChange={switchControl} />
-        <div className={cx("button")}>
+        <input type="checkbox" onChange={handleToggle} checked={isActive} disabled={disabled} />
+        <div className={cx("button", {active: isActive})}>
           <div className={cx("light")}></div>
           <div className={cx("dots")}></div>
           <div className={cx("characters")}></div>
@@ -47,6 +42,6 @@ const Buttons = ({value, data, number}) => {
       <p className={cx("content")}>{value}</p>
     </div>
   );
-};
+});
 
 export default Buttons;

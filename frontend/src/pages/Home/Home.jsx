@@ -10,9 +10,12 @@ import DefaultLayout from "~/layouts/DefaultLayout/DefaultLayout ";
 import FeatureCard from "~/components/FeatureCard/FeatureCard";
 import TestimonialCard from "~/components/TestimonialCard/TestimonialCard";
 import StatCard from "~/components/TestimonialCard copy/StatCard";
+import {useNavigate} from "react-router-dom";
 
 const cx = classNames.bind(styles);
 const Home = () => {
+  const navigate = useNavigate();
+
   const getData = () => {
     axios
       .get("http://localhost:3001/node_data")
@@ -86,27 +89,14 @@ const Home = () => {
           </div>
         </section>
 
-        <section className={cx("testimonials")}>
-          <h2>Phản Hồi Từ Khách Hàng</h2>
-          <div className={cx("testimonial-list")}>
-            <TestimonialCard name="Nguyễn Văn A" comment="Hệ thống giúp chúng tôi giảm 30% chi phí vận hành mỗi năm!" />
-            <TestimonialCard name="Trần Thị B" comment="Giải pháp IoT thực sự mang lại hiệu quả vượt trội." />
-          </div>
-        </section>
-
-        <section className={cx("statistics")}>
-          <h2>Thống Kê & Thành Tựu</h2>
-          <div className={cx("stats-list")}>
-            <StatCard number="1000+" label="Thiết bị IoT đã triển khai" />
-            <StatCard number="99.9%" label="Thời gian hoạt động ổn định" />
-            <StatCard number="50+" label="Khách hàng doanh nghiệp" />
-          </div>
-        </section>
-
         <section className={cx("cta")}>
           <h2>Bắt Đầu Ngay Hôm Nay</h2>
           <p>Hãy trải nghiệm giải pháp IoT để nâng cao hiệu quả sản xuất và tối ưu hóa quy trình làm việc.</p>
-          <button className={cx("btn")}>Đăng Ký Dùng Thử →</button>
+          <div className={cx("cta-btn")}>
+            <button onClick={() => navigate("/signin")} className={cx("btn")}>
+              Đăng Ký Dùng Thử →
+            </button>
+          </div>
         </section>
       </DefaultLayout>
     </div>

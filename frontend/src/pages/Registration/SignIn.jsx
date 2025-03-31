@@ -1,14 +1,19 @@
 import {useState} from "react";
+import {useAuth} from "~/context/AuthContext"; // Import AuthContext
 import classNames from "classnames/bind";
 import styles from "./Registration.module.scss";
 import images from "~/assets/images";
 import RegistrationLayout from "~/layouts/registrationLayout/registrationLayout ";
 import {Link, useNavigate} from "react-router-dom";
-import axios from "axios";
+import axios from "~/utils/axiosConfig";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faEye, faEyeSlash} from "@fortawesome/free-solid-svg-icons";
+import notify from "~/utils/toastify";
 
 const cx = classNames.bind(styles);
 
 const SignInForm = () => {
+  const {login} = useAuth(); // Sử dụng hàm login từ AuthContext
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
@@ -23,6 +28,7 @@ const SignInForm = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const validateForm = () => {
     let valid = true;
@@ -51,12 +57,22 @@ const SignInForm = () => {
     return valid;
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
+
   const handleChange = (e) => {
     const {name, value, type, checked} = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+
+    setFormData((prev) => {
+      const updatedForm = {
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      };
+
+      // console.log("🚀 ~ Updated formData:", updatedForm);
+      return updatedForm;
+    });
   };
 
   // const handleSubmit = async (e) => {
@@ -89,10 +105,15 @@ const SignInForm = () => {
       setIsSubmitting(true);
 
       axios
-        .post("http://localhost:3001/login", formData) // Sửa đường dẫn API (thêm `/api/`)
+        .post("/login", formData) // Sửa đường dẫn API (thêm `/api/`)
         .then((response) => {
           if (response.status === 200) {
+            console.log("User Data:", response.data.user); // Kiểm tra dữ liệu trả về
+            localStorage.setItem("token", response.data.token);
+            localStorage.setItem("user", JSON.stringify(response.data.user)); // Thêm dòng này
+            login(response.data.user); // Lưu thông tin user
             navigate("/"); // Chuyển hướng nếu đăng nhập thành công
+            notify.success("Đăng nhập thành công");
           } else {
             setIsSuccess(false);
             setErrors({
@@ -148,13 +169,16 @@ const SignInForm = () => {
               <div className={cx("formGroup")}>
                 <label htmlFor="password">Password</label>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
                   className={cx(errors.password ? "error" : "")}
                 />
+                <button type="button" className={cx("showPassword")} onClick={togglePasswordVisibility}>
+                  <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                </button>
                 {errors.password && <span className={cx("errorMessage")}>{errors.password}</span>}
               </div>
 
@@ -169,9 +193,9 @@ const SignInForm = () => {
                   />
                   <label htmlFor="rememberMe">Remember me</label>
                 </div>
-                <a href="#" className={cx("forgotPassword")}>
+                <Link to="/forgot-password" className={cx("forgotPassword")}>
                   Forgot password?
-                </a>
+                </Link>
               </div>
 
               <button type="submit" className={cx("submitButton")} disabled={isSubmitting}>

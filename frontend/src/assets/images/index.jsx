@@ -30,6 +30,19 @@ const images = {
   img28: "/assets/images/image28.jpg",
   img29: "/assets/images/image29.jpg",
   img30: "/assets/images/image30.png",
+  img31: "/assets/images/forgotPass.jpg",
+  img32: "/assets/images/image31.jpg",
+  img33: "/assets/images/image32.jpg",
+  img34: "/assets/images/image33.jpg",
+  img35: "/assets/images/image34.jpg",
+  img36: "/assets/images/image35.jpg",
+  img37: "/assets/images/image36.jpg",
+  img38: "/assets/images/members1.jpg",
+  img39: "/assets/images/members3.jpg",
+  img40: "/assets/images/members4.jpg",
+  img41: "/assets/images/members2.jpg",
+  user: "/assets/images/user.jpg",
+  errorpage: "/assets/images/errorpage.png",
 };
 
 export default images;

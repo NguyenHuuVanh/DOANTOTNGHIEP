@@ -2,7 +2,9 @@ import React, {lazy, Suspense} from "react";
 import {Route, Routes} from "react-router-dom";
 import Loading from "~/components/Loading/Loading";
 import {PATH} from "~/constants/paths";
-const SignInForm = lazy(() => import("../pages/Registration/SignIn"));
+import Delayed from "~/helper/delayed";
+// const SignInForm = lazy(() => import("../pages/Registration/SignIn"));
+const SignInForm = lazy(() => Delayed(import("../pages/Registration/SignIn"), 3000));
 
 const SignUpRouter = () => {
   return (

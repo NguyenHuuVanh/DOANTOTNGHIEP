@@ -144,6 +144,7 @@
 
     .statistics-table {
         width: 100%;
+        table-layout: fixed; // 👈 cố định chia đều cột
         border-collapse: collapse;
         margin: 20px 0;
         color: #000;
@@ -152,15 +153,14 @@
         text-align: left;
 
         td,
-        th,tr {
+        th,
+        tr {
             border: 1px solid #dddddd;
             text-align: left;
             padding: 8px;
-
         }
 
-        tbody{
-
+        tbody {
         }
 
         thead {
@@ -171,13 +171,16 @@
                     font-weight: 400;
                     text-transform: capitalize;
                     padding: 10px;
+                    white-space: nowrap;      // 👈 không xuống dòng
+                    overflow: hidden;         // 👈 ẩn phần dư
+                    text-overflow: ellipsis;  // 👈 hiện "..."
                 }
             }
         }
     }
 
     .export-button {
-        margin-top: 10px;
+        margin-top: 50px;
         width: 100%;
         padding: 10px;
         background-color: #007bff;

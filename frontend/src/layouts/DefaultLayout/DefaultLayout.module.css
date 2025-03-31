@@ -1,0 +1,14 @@
+.container {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  flex-flow: column;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.container .main {
+  width: 100%;
+}/*# sourceMappingURL=DefaultLayout.module.css.map */
