@@ -55,6 +55,7 @@ const Loader = () => {
           strokeLinecap="round"
         ></circle>
       </svg>
+      <p>Loading...</p>
     </div>
   );
 };

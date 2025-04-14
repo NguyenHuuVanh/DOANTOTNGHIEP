@@ -24,9 +24,9 @@ const cx = classNames.bind(styles);
 const Node1 = ({data}) => {
   const [dataNodes, setDataNodes] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  console.log("🚀 ~ Node1 ~ filteredData:", filteredData);
   const [dateRange, setDateRange] = useState([null, null]);
   const [timeRange, setTimeRange] = useState([TIMEPARAMS.BEGIN, TIMEPARAMS.END]);
+  const [isResourcesLoaded, setIsResourcesLoaded] = useState(false); // Trạng thái tổng thể cho việc tải tài nguyên
   const [error, setError] = useState(null);
   const {data: dataNode, error: errorData, loading: loadingData} = useFetchData("/node_data"); // Gọi custom hook
 
@@ -139,15 +139,79 @@ const Node1 = ({data}) => {
     exportToExcel();
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [loadingData, dataNode, errorData, dateRange, timeRange]);
+  // useEffect(() => {
+  //   fetchData();
+  //   const interval = setInterval(() => {
+  //     fetchData(); // Gọi lại sau mỗi 5 giây
+  //   }, 5000);
 
-  if (loadingData) {
-    <Loader />;
-  }
+  //   return () => clearInterval(interval); // Dọn dẹp interval khi component unmount
+  // }, [loadingData, dataNode, errorData, dateRange, timeRange]);
+
+  // if (loadingData) {
+  //   <Loader />;
+  // }
+  // if (error) {
+  //   return <div className={cx("error")}>Error: {error}</div>;
+  // }
+
+  // Tải tài nguyên (hình ảnh) và kiểm tra trạng thái API
+  useEffect(() => {
+    const loadResources = async () => {
+      try {
+        // Tải hình ảnh
+        const imagePromises = [images.logo, svgs.saveFile].map((src) => {
+          return new Promise((resolve) => {
+            const img = new Image();
+            img.src = src;
+            img.onload = resolve;
+            img.onerror = resolve; // Resolve ngay cả khi có lỗi
+          });
+        });
+
+        await Promise.all(imagePromises);
+
+        // Đảm bảo dữ liệu API đã tải xong
+        if (!loadingData) {
+          if (dataNode) {
+            await fetchData();
+          }
+          if (errorData) {
+            setError("Lỗi khi tải dữ liệu");
+          }
+          setIsResourcesLoaded(true);
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải tài nguyên: ", error);
+        setError("Lỗi khi tải tài nguyên");
+        setIsResourcesLoaded(true);
+      }
+    };
+
+    loadResources();
+  }, [loadingData, dataNode, errorData]);
+
+  // Cập nhật dữ liệu theo thời gian thực
+  useEffect(() => {
+    if (!isResourcesLoaded) return; // Chỉ chạy interval khi tài nguyên đã tải xong
+
+    const interval = setInterval(() => {
+      fetchData();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isResourcesLoaded]);
+
   if (error) {
     return <div className={cx("error")}>Error: {error}</div>;
+  }
+
+  if (!isResourcesLoaded) {
+    return (
+      <div className={cx("loadingContainer")}>
+        <Loader />
+      </div>
+    );
   }
 
   return (

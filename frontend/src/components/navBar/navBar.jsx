@@ -1,19 +1,42 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useAuth} from "~/context/AuthContext";
 import classNames from "classnames/bind";
 import styles from "./Navbar.module.scss";
 import images from "~/assets/images";
 import {Link, useNavigate} from "react-router-dom";
+import notify from "~/utils/toastify";
+import Loader from "../Loading/Loading";
 
 const cx = classNames.bind(styles);
 
 const Navbar = () => {
   const {user, logout} = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false); // Thêm state loading
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate("/signin");
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true); // Bắt đầu hiển thị loading
+      await logout(); // Đảm bảo hàm logout trả về Promise
+      navigate("/signin");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      notify.error("Logout failed. Please try again.");
+    } finally {
+      setIsLoggingOut(false); // Tắt loading dù thành công hay thất bại
+    }
+  };
+
+  // Hàm xử lý khi nhấp vào "Node Control"
+  const handleNodeControlClick = () => {
+    if (user) {
+      // Nếu đã đăng nhập, điều hướng đến trang Node Control
+      navigate("/node-control");
+    } else {
+      // Nếu chưa đăng nhập, điều hướng đến trang đăng nhập
+      navigate("/signin");
+      notify.warning("You must log in or register an account!");
+    }
   };
 
   return (
@@ -65,12 +88,12 @@ const Navbar = () => {
               </div>
             </li>
             <li className={cx("nav-item")}>
-              <a className={cx("nav-link")} href="/node-control">
+              <button className={cx("nav-link")} onClick={handleNodeControlClick}>
                 Node control
-              </a>
+              </button>
             </li>
             <li className={cx("nav-item")}>
-              <a className={cx("nav-link")} href="/error-page">
+              <a className={cx("nav-link")} href="/contact">
                 Contact Us
               </a>
             </li>
@@ -79,11 +102,8 @@ const Navbar = () => {
 
         {user ? (
           <div className={cx("user-menu")}>
-            <div className={cx("user_image")}>
-              <img src={images.user} alt="user_image" />
-            </div>
             <span>
-              Account
+              Hi, {user ? user.username : "Hi there!"}
               <svg viewBox="0 0 360 360" xmlSpace="preserve">
                 <g id="SVGRepo_iconCarrier">
                   <path
@@ -96,15 +116,16 @@ const Navbar = () => {
             </span>
             <div className={cx("submenu")}>
               <div className={cx("submenu-item")}>
-                <Link className={cx("submenu-link")} to="/account-detail">
-                  Account information
+                <Link className={cx("submenu-link")} to="/change-infomation">
+                  My account
                 </Link>
               </div>
               <div className={cx("submenu-item")}>
-                <Link className={cx("submenu-link")} to="/change-infomation">
+                <Link className={cx("submenu-link")} to="/account-detail">
                   Change information
                 </Link>
               </div>
+
               <div className={cx("submenu-item")}>
                 <Link className={cx("submenu-link")} to="/change-password">
                   Change password
@@ -120,18 +141,19 @@ const Navbar = () => {
         ) : (
           <div className={cx("regestration")}>
             <div className={cx("sign-in")}>
-              <Link to="/signup">
+              <a href="/signup">
                 <button className={cx("sign_in")}>Sign up</button>
-              </Link>
+              </a>
             </div>
             <div className={cx("sign-in")}>
-              <Link to="/signin">
+              <a href="/signin">
                 <button className={cx("sign_in")}>Sign in</button>
-              </Link>
+              </a>
             </div>
           </div>
         )}
       </header>
+      {isLoggingOut && <Loader />}
     </div>
   );
 };

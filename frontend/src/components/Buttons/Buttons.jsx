@@ -1,7 +1,6 @@
 import React, {memo, useEffect, useState} from "react";
 import classNames from "classnames/bind";
 import styles from "./Buttons.module.scss";
-import axios from "axios";
 
 const cx = classNames.bind(styles);
 

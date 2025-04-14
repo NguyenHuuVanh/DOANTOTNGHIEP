@@ -25,3 +25,6 @@ yarn-error.log*
 # Bỏ qua file .env để không bị lộ thông tin nhạy cảm
 .env
 
+#data control
+dataControl.json
+

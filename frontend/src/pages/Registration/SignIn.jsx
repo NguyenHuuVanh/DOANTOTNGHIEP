@@ -1,20 +1,21 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useAuth} from "~/context/AuthContext"; // Import AuthContext
 import classNames from "classnames/bind";
 import styles from "./Registration.module.scss";
 import images from "~/assets/images";
 import RegistrationLayout from "~/layouts/registrationLayout/registrationLayout ";
-import {Link, useNavigate} from "react-router-dom";
+import {Link, useLocation, useNavigate} from "react-router-dom";
 import axios from "~/utils/axiosConfig";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faEye, faEyeSlash} from "@fortawesome/free-solid-svg-icons";
 import notify from "~/utils/toastify";
+import {AiFillEye, AiFillEyeInvisible} from "react-icons/ai";
+import Loader from "~/components/Loading/Loading";
 
 const cx = classNames.bind(styles);
 
 const SignInForm = () => {
   const {login} = useAuth(); // Sử dụng hàm login từ AuthContext
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -29,6 +30,7 @@ const SignInForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Trạng thái loading cho API
 
   const validateForm = () => {
     let valid = true;
@@ -70,68 +72,51 @@ const SignInForm = () => {
         [name]: type === "checkbox" ? checked : value,
       };
 
-      // console.log("🚀 ~ Updated formData:", updatedForm);
       return updatedForm;
     });
   };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   if (validateForm()) {
-  //     setIsSubmitting(true);
-
-  //     // Simulate API call
-  //     try {
-  //       await new Promise((resolve) => setTimeout(resolve, 1500));
-  //       setIsSuccess(true);
-  //       // Reset form after successful submission
-  //       setFormData({
-  //         email: "",
-  //         password: "",
-  //         rememberMe: false,
-  //       });
-  //     } catch (error) {
-  //       console.error("Sign in failed:", error);
-  //     } finally {
-  //       setIsSubmitting(false);
-  //     }
-  //   }
-  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
       setIsSubmitting(true);
+      setIsLoading(true);
+      try {
+        const response = await axios.post("/login", formData);
+        if (response.status === 200) {
+          const {token, user} = response.data;
 
-      axios
-        .post("/login", formData) // Sửa đường dẫn API (thêm `/api/`)
-        .then((response) => {
-          if (response.status === 200) {
-            console.log("User Data:", response.data.user); // Kiểm tra dữ liệu trả về
-            localStorage.setItem("token", response.data.token);
-            localStorage.setItem("user", JSON.stringify(response.data.user)); // Thêm dòng này
-            login(response.data.user); // Lưu thông tin user
-            navigate("/"); // Chuyển hướng nếu đăng nhập thành công
-            notify.success("Đăng nhập thành công");
-          } else {
-            setIsSuccess(false);
-            setErrors({
-              email: response.data.message || "Invalid email or password",
-              password: "",
-            });
-          }
-        })
-        .catch((error) => {
-          console.error("Login failed:", error.response?.data?.message || "Lỗi server");
+          // Gọi login với rememberMe
+          login({...user, token}, formData.rememberMe);
+
+          const from = location.state?.from?.pathname || "/";
+          navigate(from, {replace: true}); // Chuyển hướng đến trang trước đó hoặc trang chủ
+          notify.success("Đăng nhập thành công");
+        }
+      } catch (error) {
+        // ... xử lý lỗi
+        const errorMessage = error.response?.data?.message || "Login failed. Please try again!";
+        if (errorMessage === "Account does not exist") {
           setErrors({
-            email: "Login failed. Please try again.",
+            email: "Email address doesn't exist!",
             password: "",
           });
-        })
-        .finally(() => {
-          setIsSubmitting(false);
-        });
+        } else if (errorMessage === "Wrong password") {
+          setErrors({
+            email: "",
+            password: "Wrong password!",
+          });
+        } else {
+          setErrors({
+            email: "",
+            password: errorMessage,
+          });
+        }
+        notify.error(errorMessage);
+      } finally {
+        setIsSubmitting(false);
+        setIsLoading(false);
+      }
     }
   };
 
@@ -163,7 +148,7 @@ const SignInForm = () => {
                   onChange={handleChange}
                   className={cx(errors.email ? "error" : "")}
                 />
-                {errors.email && <span className={cx("errorMessage")}>{errors.email}</span>}
+                <span className={cx("errorMessage", errors.email ? "" : "hide")}>{errors.email}</span>
               </div>
 
               <div className={cx("formGroup")}>
@@ -177,9 +162,9 @@ const SignInForm = () => {
                   className={cx(errors.password ? "error" : "")}
                 />
                 <button type="button" className={cx("showPassword")} onClick={togglePasswordVisibility}>
-                  <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                  {showPassword ? <AiFillEye /> : <AiFillEyeInvisible />}
                 </button>
-                {errors.password && <span className={cx("errorMessage")}>{errors.password}</span>}
+                <span className={cx("errorMessage", errors.password ? "" : "hide")}>{errors.password}</span>
               </div>
 
               <div className={cx("formOptions")}>
@@ -191,7 +176,7 @@ const SignInForm = () => {
                     checked={formData.rememberMe}
                     onChange={handleChange}
                   />
-                  <label htmlFor="rememberMe">Remember me</label>
+                  <label htmlFor="rememberMe">Remember me for 7 days</label>
                 </div>
                 <Link to="/forgot-password" className={cx("forgotPassword")}>
                   Forgot password?
@@ -203,7 +188,7 @@ const SignInForm = () => {
               </button>
 
               <p className={cx("signupLink")}>
-                Don't have an account? <Link to="/signup">Sign</Link>;
+                Don't have an account? <Link to="/signup">Sign up</Link>
               </p>
             </form>
           )}
@@ -212,6 +197,12 @@ const SignInForm = () => {
           <img src={images.img28} alt="" />
         </div>
       </div>
+      {/* Hiển thị Loader fullscreen khi isLoading là true */}
+      {isLoading && (
+        <div className={cx("fullscreenLoader")}>
+          <Loader />
+        </div>
+      )}
     </RegistrationLayout>
   );
 };

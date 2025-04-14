@@ -11,7 +11,6 @@ const useFetchData = (url) => {
       try {
         setLoading(true);
         const response = await axiosInstance.get(url);
-        console.log("API Response:", response.data); // Kiểm tra dữ liệu
         setData(response.data);
       } catch (err) {
         console.error("Error fetching node data:", err);

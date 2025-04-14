@@ -26,7 +26,6 @@ const DeviceStatistics = () => {
   const [dataNodes, setDataNodes] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [dateRange, setDateRange] = useState([null, null]);
-  console.log("🚀 ~ DeviceStatistics ~ dateRange:", dateRange);
   const [timeRange, setTimeRange] = useState([TIMEPARAMS.BEGIN, TIMEPARAMS.END]);
   const {data: dataNode, error: errorData, loading: loadingData} = useFetchData("/node_data"); // Gọi custom hook
 

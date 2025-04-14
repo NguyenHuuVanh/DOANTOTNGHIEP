@@ -11,4 +11,5 @@ export const PATH = {
   ACCOUNTDETAIL: "/account-detail",
   CHANGEPASSWORD: "/change-password",
   CHANGEINFOMATION: "/change-infomation",
+  CONTACT: "/contact",
 };

@@ -422,3 +422,10 @@
 .export_excel:active {
   transform: translate(2px, 2px);
 }
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}

@@ -1,12 +1,14 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import classNames from "classnames/bind";
 import styles from "./About.module.scss";
 import DefaultLayout from "~/layouts/DefaultLayout/DefaultLayout ";
 import images from "~/assets/images";
+import Loader from "../Loading/Loading";
 
 const cx = classNames.bind(styles);
 
 const About = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const teamMembers = [
     {
       name: "Nguyễn Hữu Việt Anh",
@@ -30,25 +32,52 @@ const About = () => {
     },
   ];
 
-  return (
-    <DefaultLayout>
-      <section className={cx("team-page")}>
-        <div className={cx("team-header")}>
-          <h1>Below is a list of members who built and developed this project</h1>
-          <p className={cx("philosophy")}>
-            The project is a combination of hardware and software that hopes to bring a completely new solution in IOT.
-          </p>
-        </div>
+  useEffect(() => {
+    const loadImages = async () => {
+      const imagePromises = teamMembers.map((member) => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.src = member.avatar;
+          img.onload = resolve;
+          img.onerror = resolve; // Resolve ngay cả khi có lỗi để không bị treo
+        });
+      });
 
-        <div className={cx("team-members")}>
-          {teamMembers.map((member, index) => (
-            <React.Fragment key={member.name}>
-              <TeamMember name={member.name} role={member.role} bio={member.bio} avatar={member.avatar} />
-            </React.Fragment>
-          ))}
+      await Promise.all(imagePromises);
+      setIsLoading(false);
+    };
+
+    loadImages();
+  }, []);
+
+  return (
+    <>
+      {isLoading ? (
+        <div className={cx("loadingContainer")}>
+          <Loader />
         </div>
-      </section>
-    </DefaultLayout>
+      ) : (
+        <DefaultLayout>
+          <section className={cx("team-page")}>
+            <div className={cx("team-header")}>
+              <h1>Below is a list of members who built and developed this project</h1>
+              <p className={cx("philosophy")}>
+                The project is a combination of hardware and software that hopes to bring a completely new solution in
+                IOT.
+              </p>
+            </div>
+
+            <div className={cx("team-members")}>
+              {teamMembers.map((member, index) => (
+                <React.Fragment key={member.name}>
+                  <TeamMember name={member.name} role={member.role} bio={member.bio} avatar={member.avatar} />
+                </React.Fragment>
+              ))}
+            </div>
+          </section>
+        </DefaultLayout>
+      )}
+    </>
   );
 };
 

@@ -3,7 +3,7 @@ $app-highlight-color: #8a2be2;
 $app-text-color: #333;
 $app-button-bg: linear-gradient(to right, #0066ff, #8a2be2);
 
-@mixin submenu($visibility, $opacity, $overflow, $top, $with,$left,$minWidth) {
+@mixin submenu($visibility, $opacity, $overflow, $top, $with, $left, $minWidth) {
   .submenu {
     display: flex;
     flex-direction: column;
@@ -15,7 +15,7 @@ $app-button-bg: linear-gradient(to right, #0066ff, #8a2be2);
     min-width: $minWidth;
     overflow: $overflow;
     border: 1px solid #cccccc;
-    // background-color: #7f8c8d;
+    background-color: #eee;
     opacity: $opacity;
     visibility: $visibility;
     transform: translateY(-12px);
@@ -39,11 +39,15 @@ $app-button-bg: linear-gradient(to right, #0066ff, #8a2be2);
       }
     }
 
+    button.submenu-link {
+      cursor: pointer;
+    }
+
     .submenu-item {
       width: 100%;
       transition: background 0.48s cubic-bezier(0.23, 1, 0.32, 1);
 
-      &:hover{
+      &:hover {
         background: #000;
         color: #fff;
       }
@@ -53,10 +57,11 @@ $app-button-bg: linear-gradient(to right, #0066ff, #8a2be2);
 
 .container {
   width: 100%;
-  height: 100%;
+  position: fixed;
   background-color: #f9f9f9;
   box-sizing: border-box;
-  z-index: 9999;
+  z-index: 999;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
   .header {
     display: flex;
@@ -101,6 +106,9 @@ $app-button-bg: linear-gradient(to right, #0066ff, #8a2be2);
             font-size: 1.4rem;
             color: #333;
             font-weight: 400;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
 
             svg {
               margin-left: 5px;
@@ -110,47 +118,7 @@ $app-button-bg: linear-gradient(to right, #0066ff, #8a2be2);
             }
           }
 
-          // .submenu {
-          //   display: flex;
-          //   flex-direction: column;
-          //   position: absolute;
-          //   top: 100%;
-          //   left: 0;
-          //   padding: 4px;
-          //   width: 100%;
-          //   overflow: hidden;
-          //   border: 1px solid #cccccc;
-          //   // background-color: #7f8c8d;
-          //   opacity: 0;
-          //   visibility: hidden;
-          //   transform: translateY(-12px);
-          //   transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
-          //   z-index: 1;
-          //   pointer-events: none;
-          //   list-style: none;
-
-          //   .submenu-link {
-          //     font-size: 1.4rem;
-          //     display: block;
-          //     color: #000;
-          //     text-decoration: none;
-          //     padding: 4px;
-          //     width: 100%;
-          //     position: relative;
-          //     transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
-
-          //     &:hover {
-          //       background: #000;
-          //       color: #fff;
-          //     }
-          //   }
-
-          //   .submenu-item {
-          //     width: 100%;
-          //     transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
-          //   }
-          // }
-          @include submenu(hidden, 0, hidden, 100%, 100%,unset,100px);
+          @include submenu(hidden, 0, hidden, 100%, 100%, unset, 100px);
 
           &:hover .nav-link svg {
             transform: rotate(-180deg);
@@ -177,19 +145,12 @@ $app-button-bg: linear-gradient(to right, #0066ff, #8a2be2);
         transform: rotate(-180deg);
       }
 
-     
-
-      .user_image {
-        width: 30px;
-        height: 30px;
-      }
-
       span {
         display: flex;
         position: relative;
         align-items: center;
         flex-flow: row;
-        // margin-left: 5px;
+        font-weight: bold;
         gap: 5px;
         font-size: 1.4rem;
         color: #333;
@@ -199,11 +160,8 @@ $app-button-bg: linear-gradient(to right, #0066ff, #8a2be2);
           height: 10px;
           transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
         }
-
-       
       }
-      @include submenu(hidden, 0, hidden, 70px, 200px,86%,150px);
-
+      @include submenu(hidden, 0, hidden, 70px, 200px, 86%, 150px);
 
       img {
         width: 100%;
@@ -227,8 +185,6 @@ $app-button-bg: linear-gradient(to right, #0066ff, #8a2be2);
         color: #fff;
       }
     }
-
-   
 
     .regestration {
       display: flex;
@@ -256,7 +212,7 @@ $app-button-bg: linear-gradient(to right, #0066ff, #8a2be2);
   }
 }
 
-.logout{
+.logout {
   background-color: transparent;
   border: none;
   text-align-last: left;

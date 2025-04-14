@@ -1,3 +1,4 @@
+@charset "UTF-8";
 .account-page {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   background-color: #f5f5f5;
@@ -19,7 +20,8 @@
   display: flex;
   gap: 8px;
 }
-.browser-tab .tab-close, .browser-tab .tab-add {
+.browser-tab .tab-close,
+.browser-tab .tab-add {
   background: none;
   border: none;
   cursor: pointer;
@@ -29,7 +31,8 @@
   padding: 4px;
   border-radius: 4px;
 }
-.browser-tab .tab-close:hover, .browser-tab .tab-add:hover {
+.browser-tab .tab-close:hover,
+.browser-tab .tab-add:hover {
   background-color: #e0e0e0;
 }
 .browser-tab .tab-title {
@@ -123,7 +126,8 @@
   align-items: center;
   gap: 12px;
 }
-.account-header .look-around-btn, .account-header .invite-user-btn {
+.account-header .look-around-btn,
+.account-header .invite-user-btn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -135,10 +139,12 @@
   padding: 8px 12px;
   border-radius: 4px;
 }
-.account-header .look-around-btn:hover, .account-header .invite-user-btn:hover {
+.account-header .look-around-btn:hover,
+.account-header .invite-user-btn:hover {
   background-color: #f5f5f5;
 }
-.account-header .look-around-btn .icon, .account-header .invite-user-btn .icon {
+.account-header .look-around-btn .icon,
+.account-header .invite-user-btn .icon {
   color: #0066ff;
 }
 .account-header .create-btn {
@@ -247,14 +253,18 @@
   font-weight: 500;
   color: #555;
 }
-.form-section .form-input, .form-section .form-select, .form-section .form-textarea {
+.form-section .form-input,
+.form-section .form-select,
+.form-section .form-textarea {
   padding: 10px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
   width: 100%;
 }
-.form-section .form-input:focus, .form-section .form-select:focus, .form-section .form-textarea:focus {
+.form-section .form-input:focus,
+.form-section .form-select:focus,
+.form-section .form-textarea:focus {
   outline: none;
   border-color: #0066ff;
 }
@@ -264,6 +274,13 @@
 }
 .form-section .select-wrapper {
   position: relative;
+}
+.form-section .select-wrapper .ant-picker {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 100%;
 }
 .form-section .select-wrapper .select-icon {
   position: absolute;
@@ -278,6 +295,37 @@
      -moz-appearance: none;
           appearance: none;
   padding-right: 30px;
+}
+.form-section .select-wrapper .date-input-container {
+  position: relative;
+  width: 100%;
+}
+.form-section .select-wrapper .date-input-container .date-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: "Arial", sans-serif;
+  color: #000;
+  transition: border-color 0.3s ease;
+  /* Ẩn mũi tên spin trong trình duyệt Webkit */
+}
+.form-section .select-wrapper .date-input-container .date-input:focus {
+  outline: none;
+  border-color: #0066ff;
+}
+.form-section .select-wrapper .date-input-container .date-input::-moz-placeholder {
+  color: #bdbdbd;
+  opacity: 1;
+}
+.form-section .select-wrapper .date-input-container .date-input::placeholder {
+  color: #bdbdbd;
+  opacity: 1;
+}
+.form-section .select-wrapper .date-input-container .date-input::-webkit-inner-spin-button, .form-section .select-wrapper .date-input-container .date-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 .form-section .current-time {
   display: flex;

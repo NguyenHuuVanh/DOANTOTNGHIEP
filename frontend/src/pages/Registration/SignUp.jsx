@@ -3,11 +3,12 @@ import styles from "./Registration.module.scss";
 import classNames from "classnames/bind";
 import images from "~/assets/images";
 import RegistrationLayout from "~/layouts/registrationLayout/registrationLayout ";
-import {Link} from "react-router-dom";
-import axios from "axios";
+import axios from "~/utils/axiosConfig";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCheck, faChevronRight, faEye, faEyeSlash} from "@fortawesome/free-solid-svg-icons";
+import {faCheck, faChevronRight} from "@fortawesome/free-solid-svg-icons";
 import notify from "~/utils/toastify";
+import {AiFillEye, AiFillEyeInvisible} from "react-icons/ai";
+import {useNavigate} from "react-router-dom";
 
 const cx = classNames.bind(styles);
 
@@ -32,69 +33,7 @@ const SignUpForm = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  // const validateForm = () => {
-  //   let valid = true;
-  //   const newErrors = {
-  //     firstName: "",
-  //     lastName: "",
-  //     email: "",
-  //     password: "",
-  //     confirmPassword: "",
-  //   };
-
-  //   console.log("🔍 Checking password match:", formData.password, formData.confirmPassword);
-
-  //   // First name validation
-  //   if (!formData.firstName.trim()) {
-  //     newErrors.firstName = "First name is required";
-  //     valid = false;
-  //   }
-
-  //   // Last name validation
-  //   if (!formData.lastName.trim()) {
-  //     newErrors.lastName = "Last name is required";
-  //     valid = false;
-  //   }
-
-  //   // Email validation
-  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  //   if (!formData.email.trim()) {
-  //     newErrors.email = "Email is required";
-  //     valid = false;
-  //   } else if (!emailRegex.test(formData.email)) {
-  //     newErrors.email = "Please enter a valid email";
-  //     valid = false;
-  //   }
-
-  //   // Password validation
-  //   if (!formData.password) {
-  //     newErrors.password = "Password is required";
-  //     valid = false;
-  //   } else if (formData.password.length < 8) {
-  //     newErrors.password = "Password must be at least 8 characters";
-  //     valid = false;
-  //   }
-
-  //   console.log(formData.password !== formData.confirmPassword);
-
-  //   // Confirm password validation
-  //   if (!formData.confirmPassword.trim()) {
-  //     newErrors.confirmPassword = "Please confirm your password";
-  //     valid = false;
-  //   } else if (formData.confirmPassword.length < 8) {
-  //     newErrors.confirmPassword = "Confirm password must be at least 8 characters";
-  //     valid = false;
-  //   } else if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
-  //     newErrors.confirmPassword = "Passwords do not match";
-  //     valid = false;
-  //   } else {
-  //     newErrors.confirmPassword = "";
-  //   }
-
-  //   setErrors(newErrors);
-  //   return valid;
-  // };
+  const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors = {
@@ -174,9 +113,12 @@ const SignUpForm = () => {
     const {name, value} = e.target;
     setFormData((prev) => {
       const updatedForm = {...prev, [name]: value};
-      console.log("🚀 ~ Updated formData:", updatedForm); // ✅ Giá trị mới được in ra đúng
       return updatedForm;
     });
+  };
+
+  const handleChangeLink = () => {
+    navigate("/signin");
   };
 
   const handleSubmit = async (e) => {
@@ -187,6 +129,8 @@ const SignUpForm = () => {
 
       const userData = {
         username: formData.firstName + formData.lastName, // Gộp làm username
+        firstname: formData.firstName,
+        lastname: formData.lastName,
         email: formData.email,
         password: formData.password,
         confirmPassword: formData.confirmPassword,
@@ -194,9 +138,8 @@ const SignUpForm = () => {
       };
 
       try {
-        const response = await axios.post("http://localhost:3001/register", userData);
+        const response = await axios.post("/register", userData);
 
-        console.log("🚀 ~ handleSubmit ~ response.status:", response.status);
         if (response.status === 201) {
           setIsSuccess(true);
           notify.success("Đăng ký tài khoản thành công");
@@ -247,7 +190,7 @@ const SignUpForm = () => {
               <div className={cx("successIcon")}>{<FontAwesomeIcon icon={faCheck} />}</div>
               <h2>Registration Successful!</h2>
               <p>Your account has been created successfully.</p>
-              <button className={cx("resetButton")} onClick={() => setIsSuccess(false)}>
+              <button className={cx("resetButton")} onClick={handleChangeLink}>
                 <span>
                   SIGN IN <FontAwesomeIcon icon={faChevronRight} />
                 </span>
@@ -309,7 +252,7 @@ const SignUpForm = () => {
                   className={cx(errors.password ? "error" : "")}
                 />
                 <button type="button" className={cx("showPassword")} onClick={togglePasswordVisibility}>
-                  <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                  {showPassword ? <AiFillEye /> : <AiFillEyeInvisible />}
                 </button>
                 <span className={cx(errors.password ? "errorMessage" : "NoerrorMessage")}>{errors.password}</span>
               </div>
@@ -325,7 +268,7 @@ const SignUpForm = () => {
                   className={cx(errors.confirmPassword ? "error" : "")}
                 />
                 <button type="button" className={cx("showConfirmPassword")} onClick={toggleConfirmPasswordVisibility}>
-                  <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
+                  {showConfirmPassword ? <AiFillEye /> : <AiFillEyeInvisible />}
                 </button>
                 <span className={cx(errors.confirmPassword ? "errorMessage" : "NoerrorMessage")}>
                   {errors.confirmPassword}
@@ -337,7 +280,7 @@ const SignUpForm = () => {
               </button>
 
               <p className={cx("loginLink")}>
-                Already have an account? <Link to="/signin">Log in</Link>;
+                Already have an account? <a href="/signin">Log in</a>;
               </p>
             </form>
           )}

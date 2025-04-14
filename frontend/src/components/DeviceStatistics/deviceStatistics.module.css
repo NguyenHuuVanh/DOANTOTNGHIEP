@@ -124,6 +124,7 @@
 }
 .container .statistics-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   margin: 20px 0;
   color: #000;
@@ -132,7 +133,8 @@
   text-align: left;
 }
 .container .statistics-table td,
-.container .statistics-table th, .container .statistics-table tr {
+.container .statistics-table th,
+.container .statistics-table tr {
   border: 1px solid #dddddd;
   text-align: left;
   padding: 8px;
@@ -143,9 +145,12 @@
   font-weight: 400;
   text-transform: capitalize;
   padding: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .container .export-button {
-  margin-top: 10px;
+  margin-top: 50px;
   width: 100%;
   padding: 10px;
   background-color: #007bff;

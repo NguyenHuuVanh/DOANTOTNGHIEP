@@ -1,9 +1,19 @@
 /* From Uiverse.io by Nawsome */
 .container {
   display: flex;
+  width: 100%;
+  flex-flow: column;
   justify-content: center;
+  background-color: #f9f9f9;
   align-items: center;
+  gap: 20px;
   height: 100vh;
+
+  p{
+    font-size: 1.8rem;
+    font-weight: 500;
+    white-space: 1.5px;
+  }
 }
 
 /* From Uiverse.io by Nawsome */ 

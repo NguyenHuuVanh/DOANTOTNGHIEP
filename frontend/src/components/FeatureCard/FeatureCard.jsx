@@ -4,10 +4,15 @@ import styles from "./FeatureCard.module.scss";
 
 const cx = classNames.bind(styles);
 
-const FeatureCard = ({title, description}) => (
+const FeatureCard = ({title, description, img}) => (
   <div className={cx("feature-card")}>
-    <h3>{title}</h3>
-    <p>{description}</p>
+    <div className={cx("feature-card-image")}>
+      <img src={img} alt="feature-image" />
+    </div>
+    <div className={cx("feature_footer")}>
+      <h3>{title}</h3>
+      <p>{description}</p>
+    </div>
   </div>
 );
 

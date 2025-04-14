@@ -16,18 +16,14 @@ import notify from "~/utils/toastify";
 import {TIMEPARAMS} from "~/constants/times";
 import moment from "moment";
 import useFetchData from "~/hooks/useFetchData";
-const format = "HH:mm";
+import {filterDataByDateTime} from "~/helper/filterHelper";
 const {RangePicker} = DatePicker;
 
 const cx = classNames.bind(styles);
 
-const Node2 = ({data}) => {
+const Node1 = ({data}) => {
   const [dataNodes, setDataNodes] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  // const [startDate, setStartDate] = useState("");
-  // const [endDate, setEndDate] = useState("");
-  // const [startTimeValue, setStarTimeValue] = useState(TIMEPARAMS.BEGIN);
-  // const [endTimeValue, setEndTimeValue] = useState(TIMEPARAMS.END);
   const [dateRange, setDateRange] = useState([null, null]);
   const [timeRange, setTimeRange] = useState([TIMEPARAMS.BEGIN, TIMEPARAMS.END]);
   const [error, setError] = useState(null);
@@ -72,124 +68,60 @@ const Node2 = ({data}) => {
     }
   };
 
-  // const onRangeDateChange = (dates, dateStrings) => {
-  //   if (dates) {
-  //     setStartDate(dateStrings[0]);
-  //     setEndDate(dateStrings[1]);
-  //   } else {
-  //     console.log("Clear");
-  //     fetchData();
-  //   }
-  // };
-
-  // const onRangeTimeChange = (times, timesStrings) => {
-  //   if (times) {
-  //     console.log("🚀 ~ Node1 ~ times:", timesStrings);
-  //     setStarTimeValue(timesStrings[0]);
-  //     setEndTimeValue(timesStrings[1]);
-  //   } else {
-  //     fetchData();
-  //   }
-  // };
-
-  // const handleFilter = () => {
-  //   if (!startDate || !endDate) {
-  //     setFilteredData(dataNodes);
-  //     return;
-  //   }
-
-  //   const filtered = dataNodes.filter((item) => {
-  //     const itemTime = moment(`${item.date}T${item.time}`);
-  //     const start = moment(`${startDate}T${startTimeValue}`);
-  //     const end = moment(`${endDate}T${endTimeValue}`);
-  //     return itemTime.isBetween(start, end, null, "[]");
-  //   });
-
-  //   setFilteredData(filtered);
-  // };
-
   // Xử lý thay đổi ngày
-  const handleDateChange = (dates, dateStrings) => {
-    setDateRange(dates);
-
-    // Reset time khi ngày thay đổi
-    if (!dates) {
-      setTimeRange([TIMEPARAMS.BEGIN, TIMEPARAMS.END]);
+  const handleDateChange = (dates) => {
+    if (!dates || dates.length < 2 || !dates[0] || !dates[1]) {
+      setDateRange([null, null]);
+      return;
     }
+
+    const formattedDates = dates.map((d) => d.format("DD-MM-YYYY")); // ← chuyển về chuỗi "24-12-2024"
+
+    setDateRange(formattedDates); // ← kết quả là mảng string ["24-12-2024", "24-12-2024"]
   };
 
   // Xử lý thay đổi giờ
-  const handleTimeChange = (times, timeStrings) => {
-    setTimeRange(times);
+  const handleTimeChange = (times) => {
+    if (!times || times.length < 2 || !times[0] || !times[1]) {
+      setTimeRange([TIMEPARAMS.BEGIN, TIMEPARAMS.END]); // hoặc giá trị mặc định bạn muốn
+      return;
+    }
+
+    const formattedTimes = times.map((t) => t.format("HH:mm")); // ← chuyển về chuỗi giờ
+    setTimeRange(formattedTimes); // → ["09:00", "18:00"]
   };
 
   const handleFilter = () => {
     try {
-      // Kiểm tra ngày và giờ có hợp lệ không
-      if (!dateRange || dateRange.filter(Boolean).length < 2) {
-        notify.error("Vui lòng chọn khoảng ngày");
-        return;
+      const filtered = filterDataByDateTime(dataNodes, dateRange, timeRange);
+
+      if (filtered.length === 0) {
+        notify.warning("⚠️ Không tìm thấy dữ liệu trong khoảng thời gian đã chọn.");
+      } else {
+        notify.success(`✅ Đã tìm thấy ${filtered.length} bản ghi.`);
       }
 
-      if (!timeRange || timeRange.filter(Boolean).length < 2) {
-        notify.error("Vui lòng chọn khoảng thời gian");
-        return;
-      }
-
-      const [startDateObj, endDateObj] = dateRange;
-      const [startTimeStr, endTimeStr] = timeRange;
-
-      // Tạo moment object với timezone
-      const createMoment = (date, time) =>
-        moment(`${moment(date).format("YYYY-MM-DD")}T${time}`, "YYYY-MM-DDTHH:mm", true);
-
-      const start = createMoment(startDateObj, startTimeStr);
-      const end = createMoment(endDateObj, endTimeStr);
-
-      if (!start.isValid() || !end.isValid()) {
-        throw new Error("Thời gian không hợp lệ");
-      }
-
-      if (start.isAfter(end)) {
-        notify.error("Thời gian bắt đầu phải trước thời gian kết thúc");
-        return;
-      }
-
-      // Lọc dữ liệu với boundary check
-      const filtered = dataNodes.filter((item) => {
-        const itemTime = moment(`${item.date}T${item.time}`, "YYYY-MM-DDTHH:mm", true);
-
-        return itemTime.isBetween(start, end, "minutes", "[]");
-      });
-
-      setFilteredData(filtered.length > 0 ? filtered : []);
-      notify.success(`Tìm thấy ${filtered.length} bản ghi`);
+      setFilteredData(filtered);
     } catch (error) {
-      console.error("Lỗi lọc dữ liệu:", error);
-      notify.error(error.message || "Lỗi khi lọc dữ liệu");
+      notify.error(error.message || "Lỗi hệ thống khi lọc dữ liệu");
     }
   };
 
   // Hàm tính nhiệt độ và độ ẩm trung bình
   const averageTemperatureAndHumidity = () => {
-    if (!dataNodes.length) return {temperature: 0, humidity: 0};
+    if (!filteredData.length) return {temperature: 0, humidity: 0};
 
-    const validTemps = dataNodes
-      .slice(0, 20)
+    const validTemps = filteredData
+      .slice(filteredData.length - 21, filteredData.length - 1)
       .map((item) => item.temperature)
       .filter((temp) => typeof temp === "number" && !isNaN(temp));
 
-    const validHumidity = dataNodes
-      .slice(0, 20)
-      .map((item) => item.humidity)
-      .filter((humidity) => typeof humidity === "number" && !isNaN(humidity));
-
-    if (!validTemps.length || !validHumidity.length) return {temperature: 0, humidity: 0};
+    const currentTemperature = filteredData && filteredData[filteredData.length - 1].temperature;
 
     const averageTemperature = Math.round(averageRounded(validTemps));
-    const averageHumidity = Math.round(averageRounded(validHumidity));
+    const currentTemp = Math.round(currentTemperature);
 
-    return {temperature: averageTemperature, humidity: averageHumidity};
+    return {temperature: averageTemperature, currentTemperature: currentTemp};
   };
 
   // Hàm export file Excel
@@ -208,7 +140,12 @@ const Node2 = ({data}) => {
 
   useEffect(() => {
     fetchData();
-  }, [loadingData, dataNode, errorData]);
+    const interval = setInterval(() => {
+      fetchData(); // Gọi lại sau mỗi 5 giây
+    }, 5000);
+
+    return () => clearInterval(interval); // Dọn dẹp interval khi component unmount
+  }, [loadingData, dataNode, errorData, dateRange, timeRange]);
 
   if (loadingData) {
     <Loader />;
@@ -236,8 +173,8 @@ const Node2 = ({data}) => {
                 <table className={cx("table")}>
                   <tbody>
                     <tr>
-                      <th>Temperature entering the drying chamber:</th>
-                      <th className={cx("templerature")}>45°C</th>
+                      <th>Current Temperature entering the drying chamber:</th>
+                      <th className={cx("templerature")}>{averageTemperatureAndHumidity().currentTemperature}°C</th>
                     </tr>
                     <tr>
                       <th>Average temperature:</th>
@@ -249,19 +186,17 @@ const Node2 = ({data}) => {
             </div>
             <div className={cx("filter")}>
               <div className={cx("filter_location")}>
-                <Space direction="vertical" size={12}>
-                  <RangePicker
-                    presets={TIMEPARAMS.rangePresets}
-                    onChange={handleDateChange}
-                    style={{width: "100%", borderRadius: "2px"}}
-                    disabledDate={(current) => current > moment().endOf("day")}
-                  />
-                </Space>
+                <RangePicker
+                  presets={TIMEPARAMS.rangePresets}
+                  onChange={handleDateChange}
+                  style={{width: "100%", borderRadius: "2px"}}
+                  disabledDate={(current) => current > moment().endOf("day")}
+                />
                 <TimePicker.RangePicker
                   defaultValue={[TIMEPARAMS.startTime, TIMEPARAMS.endTime]}
-                  format={format}
+                  format="HH:mm"
                   onChange={handleTimeChange}
-                  disabled={!dateRange}
+                  disabled={!dateRange || !dateRange[0] || !dateRange[1]} // Chỉ kích hoạt khi người dùng chọn ngày
                   style={{width: "100%", borderRadius: "2px"}}
                 />
               </div>
@@ -306,7 +241,7 @@ const Node2 = ({data}) => {
           <div className={cx("content")}>
             <div className={cx("chart")}>
               <h2 className={cx("title")}>Real-time temperature and humidity value chart</h2>
-              <Chart data={dataNodes} />
+              <Chart data={filteredData} />
               <div className={cx("export_btn")}>
                 <button className={cx("export_excel")}>
                   <div className={cx("sign")}>
@@ -326,4 +261,4 @@ const Node2 = ({data}) => {
   );
 };
 
-export default Node2;
+export default Node1;

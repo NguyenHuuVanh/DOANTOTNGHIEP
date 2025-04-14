@@ -1,13 +1,47 @@
 .feature-card {
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  border-radius: 16px;
+  cursor: pointer;
+  box-shadow: 12px 17px 51px rgba(0, 0, 0, 0.22);
+  transition: 0.5s ease;
+  background-color: #0b3a4e;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  .feature-card-image {
     width: 100%;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: 0.5s ease;
-    background-color: #f9f9f9;
+    min-height: 300px;
 
-
-    &:hover{
-      transform: scale(1.05);
+    img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 16px;
     }
   }
+
+  .feature_footer {
+    display: flex;
+    justify-content: flex-start;
+    align-items: start;
+    margin-top: 10px;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    row-gap: 1rem;
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: #fff;
+
+    h3 {
+      font-size: 2.4rem;
+    }
+
+    p {
+      font-size: 1.4rem;
+    }
+  }
+}
