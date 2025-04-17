@@ -2,6 +2,10 @@ $app-primary-color: #0066ff;
 $app-highlight-color: #8a2be2;
 $app-text-color: #333;
 $app-button-bg: linear-gradient(to right, #0066ff, #8a2be2);
+$mobile-breakpoint: 768px;
+$tablet-breakpoint: 992px;
+$extralarge-breakpoint: 1200px;
+$desktop-breakpoint: 1400px;
 
 @mixin submenu($visibility, $opacity, $overflow, $top, $with, $left, $minWidth) {
   .submenu {
@@ -68,11 +72,22 @@ $app-button-bg: linear-gradient(to right, #0066ff, #8a2be2);
     align-items: center;
     justify-content: space-between;
     margin: 0 auto;
-    padding: 14px 60px;
+    padding: 14px 20px;
+
+    @media (min-width: $mobile-breakpoint) {
+      padding: 14px 40px;
+    }
+
+    @media (min-width: $tablet-breakpoint) {
+      padding: 14px 60px;
+    }
 
     .logo {
+      display: flex;
+      align-items: center;
       height: 60px;
       width: 60px;
+
       .nav-item {
         list-style-type: none;
 
@@ -87,20 +102,95 @@ $app-button-bg: linear-gradient(to right, #0066ff, #8a2be2);
           }
         }
       }
+
+      @media (min-width: $mobile-breakpoint) {
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    // Hamburger menu toggle button
+    .menuToggle {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 30px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      z-index: 10;
+
+      @media (min-width: #{$mobile-breakpoint}) {
+        display: none;
+      }
+
+      .menuIcon {
+        width: 30px;
+        height: 30px;
+        color: #333;
+        transition: all 0.3s ease-in-out;
+      }
     }
 
     .navbar {
+      @media (max-width: #{$mobile-breakpoint - 0.1px}) {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 80%;
+        max-width: 300px;
+        height: 100vh;
+        background-color: #f9f9f9;
+        padding-top: 80px;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+        z-index: 5;
+
+        &.navbar-active {
+          right: 0;
+        }
+      }
+
       .navbar-nav {
         display: flex;
         align-items: center;
         list-style-type: none;
-        gap: 120px;
+        gap: 20px;
+
+        @media (max-width: #{$mobile-breakpoint}) {
+          flex-direction: column;
+          align-items: flex-start;
+          padding: 0 20px;
+          padding-top: 20px;
+          border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        @media (min-width: $mobile-breakpoint) {
+          gap: 32px;
+        }
+
+        @media (min-width: $extralarge-breakpoint) {
+          gap: 90px;
+        }
+
+        @media (min-width: $desktop-breakpoint) {
+          gap: 120px;
+        }
 
         .nav-item {
           position: relative;
+          width: 100%;
+
+          @media (min-width: $mobile-breakpoint) {
+            width: auto;
+          }
+
           .nav-link {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
             text-decoration: none;
             font-size: 1.4rem;
@@ -109,103 +199,318 @@ $app-button-bg: linear-gradient(to right, #0066ff, #8a2be2);
             border: none;
             background-color: transparent;
             cursor: pointer;
+            width: 100%;
+            padding: 10px 0;
+
+            @media (max-width: $tablet-breakpoint) {
+              justify-content: unset;
+              width: auto;
+              padding: 0;
+              gap: 10px;
+              font-size: 1.2rem;
+              padding: 10px 0;
+            }
 
             svg {
               margin-left: 5px;
-              width: 14px;
-              height: 14px;
-              transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+              width: 20px;
+              height: 20px;
+              transition: all 0.3s ease-in-out;
+
+              @media screen and (max-width: $tablet-breakpoint) {
+                width: 15px;
+                height: 15px;
+              }
+
+              @media screen and (min-width: $mobile-breakpoint) {
+                display: none;
+              }
             }
           }
 
-          @include submenu(hidden, 0, hidden, 100%, 100%, unset, 100px);
+          &.dropdown {
+            @media (max-width: #{$mobile-breakpoint - 1px}) {
+              .submenu {
+                position: static;
+                max-height: 0;
+                overflow: hidden;
+                opacity: 0;
+                visibility: visible;
+                transition:
+                  max-height 0.6s cubic-bezier(0.215, 0.61, 0.355, 1),
+                  opacity 0.5s ease,
+                  padding 0.5s ease;
+                border: none;
+                padding: 0;
+                margin: 0;
+                width: 100%;
+                background-color: transparent;
+                transform: translateY(0);
 
-          &:hover .nav-link svg {
-            transform: rotate(-180deg);
+                &.submenu-active {
+                  max-height: 500px;
+                  opacity: 1;
+                  padding: 5px 0 5px 15px;
+                  border-left: 2px solid $app-primary-color;
+                  margin-top: 5px;
+                  margin-bottom: 5px;
+                }
+
+                .submenu-item {
+                  margin: 5px 0;
+                  transition: all 0.3s ease;
+                  opacity: 1;
+                  transform: translateY(0);
+
+                  @for $i from 1 through 5 {
+                    &:nth-child(#{$i}) {
+                      transition-delay: $i * 0.05s;
+                    }
+                  }
+
+                  .submenu-link {
+                    padding: 10px 15px;
+                    border-radius: 4px;
+                    transition: all 0.3s ease;
+                    display: block;
+                    color: #555;
+                    font-size: 1.3rem;
+                    text-decoration: none;
+
+                    &:hover,
+                    &:active {
+                      background-color: rgba($app-primary-color, 0.1);
+                      color: $app-primary-color;
+                      padding-left: 20px;
+                    }
+                  }
+
+                  &:hover {
+                    background: transparent;
+                  }
+                }
+              }
+            }
           }
 
-          &:hover .submenu {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-            pointer-events: auto;
-            border-color: #000;
+          @media (min-width: $mobile-breakpoint) {
+            @include submenu(hidden, 0, hidden, 100%, 100%, unset, 100px);
+
+            &:hover .submenu {
+              opacity: 1;
+              visibility: visible;
+              transform: translateY(0);
+              pointer-events: auto;
+              border-color: #000;
+            }
+          }
+        }
+      }
+
+      .mobile-auth {
+        display: none;
+
+        @media (max-width: #{$mobile-breakpoint - 1px}) {
+          display: block;
+          padding: 20px;
+          border-top: 1px solid #ddd;
+          margin-top: 20px;
+          animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .mobile-user-menu {
+          .user-info {
+            font-weight: bold;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+          }
+
+          .mobile-submenu {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: all 0.3s ease-in-out;
+
+            .submenu-item {
+              .submenu-link {
+                display: block;
+                padding: 8px 15px;
+                font-size: 1.2rem;
+                color: #333;
+                text-decoration: none;
+                border-radius: 4px;
+                transition: all 0.3s ease;
+
+                &:hover {
+                  color: $app-primary-color;
+                  background-color: rgba($app-primary-color, 0.1);
+                  transform: translateX(5px);
+                }
+
+                @media screen and (max-width: $extralarge-breakpoint) {
+                  display: flex;
+                  align-items: center;
+                  gap: 10px;
+
+                  svg {
+                    width: 20px;
+                    height: 20px;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        .mobile-regestration {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+
+          .sign-in {
+            button.sign_in {
+              width: 100%;
+              background: none;
+              border: 1px solid #ffc1dc;
+              font-size: 1.4rem;
+              padding: 10px 30px;
+              border-radius: 20px;
+              color: #333;
+              cursor: pointer;
+              transition: all 0.3s ease-in-out;
+
+              &:hover {
+                background: #ffc1dc;
+                color: #fff;
+                transform: translateY(-3px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+              }
+
+              &:active {
+                transform: translateY(-1px);
+              }
+            }
           }
         }
       }
     }
 
-    .user-menu {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
+    .desktop-auth {
+      display: none;
 
-      &:hover svg {
-        transform: rotate(-180deg);
+      @media (min-width: $mobile-breakpoint) {
+        display: block;
       }
 
-      span {
-        display: flex;
+      .user-menu {
         position: relative;
+        display: flex;
         align-items: center;
-        flex-flow: row;
-        font-weight: bold;
-        gap: 5px;
-        font-size: 1.4rem;
-        color: #333;
+        transition: transform 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+        transform-origin: top;
+        gap: 10px;
+        cursor: pointer;
 
-        svg {
-          width: 10px;
-          height: 10px;
-          transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+        &:hover svg {
+          transform: rotate(-180deg);
+        }
+
+        span {
+          display: flex;
+          position: relative;
+          align-items: center;
+          flex-flow: row;
+          font-weight: bold;
+          gap: 5px;
+          font-size: 1.4rem;
+          color: #333;
+
+          svg {
+            width: 10px;
+            height: 10px;
+            transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+          }
+
+          @media screen and (max-width: $extralarge-breakpoint) {
+            font-size: 1.2rem;
+          }
+        }
+
+        @include submenu(hidden, 0, hidden, 0px, 200px, 0%, 150px);
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 50%;
+        }
+
+        a {
+          color: #333;
+          text-decoration: none;
+          font-size: 1.4rem;
+        }
+
+        &:hover .submenu {
+          position: absolute;
+          top: 0;
+          left: 0;
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(25%);
+
+          pointer-events: auto;
+          border-color: #000;
+          color: #fff;
+
+          @media screen and (max-width: $extralarge-breakpoint) {
+            max-width: 100px;
+
+            .submenu-item {
+              .submenu-link {
+                font-size: 1.2rem;
+              }
+            }
+          }
         }
       }
-      @include submenu(hidden, 0, hidden, 70px, 200px, 86%, 150px);
 
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 50%;
-      }
+      .regestration {
+        display: flex;
+        flex-flow: row;
+        gap: 10px;
 
-      a {
-        color: #333;
-        text-decoration: none;
-        font-size: 1.4rem;
-      }
+        .sign-in {
+          button.sign_in {
+            background: none;
+            border: 1px solid #ffc1dc;
+            font-size: 1.4rem;
+            padding: 10px 30px;
+            border-radius: 20px;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
 
-      &:hover .submenu {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-        pointer-events: auto;
-        border-color: #000;
-        color: #fff;
-      }
-    }
+            &:hover {
+              background: #ffc1dc;
+              color: #fff;
+              transform: translateY(-3px);
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
 
-    .regestration {
-      display: flex;
-      flex-flow: row;
-      gap: 10px;
+            &:active {
+              transform: translateY(-1px);
+            }
 
-      .sign-in {
-        button.sign_in {
-          background: none;
-          border: 1px solid #ffc1dc;
-          font-size: 1.4rem;
-          padding: 10px 30px;
-          border-radius: 20px;
-          color: #333;
-          cursor: pointer;
-          transition: all 0.2s ease-in-out;
-
-          &:hover {
-            background: #ffc1dc;
-            color: #fff;
+            @media (min-width: $mobile-breakpoint) and (max-width: $tablet-breakpoint) {
+              padding: 8px 16px;
+              border-radius: 8px;
+            }
           }
+        }
+
+        @media (min-width: $mobile-breakpoint) {
+          margin-left: 10px;
         }
       }
     }
@@ -216,4 +521,39 @@ $app-button-bg: linear-gradient(to right, #0066ff, #8a2be2);
   background-color: transparent;
   border: none;
   text-align-last: left;
+}
+
+// Dropdown icon styling
+.dropdown-icon {
+  transition: transform 0.3s ease;
+}
+
+// @media screen and (min-width: $tablet-breakpoint) {
+//   .nav-item:hover .dropdown-icon {
+//     transform: rotate(180deg);
+//   }
+// }
+
+// Animation for dropdown icon
+.nav-item:hover .dropdown-icon {
+  transform: rotate(180deg);
+}
+
+@media screen and (max-width: $mobile-breakpoint) {
+  .nav-item:active .dropdown-icon {
+    transform: rotate(180deg);
+  }
+}
+
+// Keyframes for fade in animation
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
