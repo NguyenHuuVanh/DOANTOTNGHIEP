@@ -14,16 +14,22 @@ $desktop-breakpoint: 1400px;
     position: absolute;
     top: $top;
     left: $left;
-    padding: 4px;
+    padding: 8px;
     width: $with;
     min-width: $minWidth;
     overflow: $overflow;
-    border: 1px solid #cccccc;
-    background-color: #eee;
+    border: none;
+    background-color: #fff;
     opacity: $opacity;
     visibility: $visibility;
     transform: translateY(-12px);
-    transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+    transition:
+      visibility 0.4s,
+      opacity 0.4s,
+      transform 0.4s cubic-bezier(0.33, 0, 0.6, 1.58);
+    transform-origin: center;
+    box-shadow: 0 1px 10px #0003;
+    border-radius: 8px;
     z-index: 9999;
     list-style: none;
 
@@ -38,8 +44,8 @@ $desktop-breakpoint: 1400px;
       transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
 
       &:hover {
-        background: #000;
-        color: #fff;
+        color: #0984e3;
+        text-decoration: underline;
       }
     }
 
@@ -52,7 +58,6 @@ $desktop-breakpoint: 1400px;
       transition: background 0.48s cubic-bezier(0.23, 1, 0.32, 1);
 
       &:hover {
-        background: #000;
         color: #fff;
       }
     }
@@ -62,7 +67,7 @@ $desktop-breakpoint: 1400px;
 .container {
   width: 100%;
   position: fixed;
-  background-color: #f9f9f9;
+  background-color: #fff;
   box-sizing: border-box;
   z-index: 999;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -172,6 +177,10 @@ $desktop-breakpoint: 1400px;
           gap: 32px;
         }
 
+        @media (min-width: $tablet-breakpoint) {
+          gap: 60px;
+        }
+
         @media (min-width: $extralarge-breakpoint) {
           gap: 90px;
         }
@@ -182,6 +191,7 @@ $desktop-breakpoint: 1400px;
 
         .nav-item {
           position: relative;
+          appearance: none;
           width: 100%;
 
           @media (min-width: $mobile-breakpoint) {
@@ -195,9 +205,10 @@ $desktop-breakpoint: 1400px;
             text-decoration: none;
             font-size: 1.4rem;
             color: #333;
-            font-weight: 400;
+            font-weight: 500;
             border: none;
             background-color: transparent;
+            font-family: "Poppins", system-ui;
             cursor: pointer;
             width: 100%;
             padding: 10px 0;
@@ -231,8 +242,14 @@ $desktop-breakpoint: 1400px;
             }
           }
 
+          .submenu {
+            border: none;
+            outline: none;
+            border-radius: 8px;
+          }
+
           &.dropdown {
-            @media (max-width: #{$mobile-breakpoint - 1px}) {
+            @media (max-width: #{$mobile-breakpoint - 0.1px}) {
               .submenu {
                 position: static;
                 max-height: 0;
@@ -254,7 +271,7 @@ $desktop-breakpoint: 1400px;
                   max-height: 500px;
                   opacity: 1;
                   padding: 5px 0 5px 15px;
-                  border-left: 2px solid $app-primary-color;
+                  border-left: 2px solid #000;
                   margin-top: 5px;
                   margin-bottom: 5px;
                 }
@@ -291,6 +308,18 @@ $desktop-breakpoint: 1400px;
                   &:hover {
                     background: transparent;
                   }
+
+                  &::after {
+                    content: "";
+                    position: absolute;
+                    left: -4px;
+                    top: 50%;
+                    width: 10%;
+                    height: 4px;
+                    border-bottom: 2px solid #000;
+                    border-radius: 8px;
+                    transform: translate(-50%,-50%);
+                  }
                 }
               }
             }
@@ -303,8 +332,12 @@ $desktop-breakpoint: 1400px;
               opacity: 1;
               visibility: visible;
               transform: translateY(0);
+              transition:
+                visibility 0.4s,
+                opacity 0.4s,
+                transform 0.4s cubic-bezier(0.3, -0.62, 0.21, 1);
               pointer-events: auto;
-              border-color: #000;
+              padding: 8px;
             }
           }
         }
