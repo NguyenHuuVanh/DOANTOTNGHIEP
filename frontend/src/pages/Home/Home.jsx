@@ -2,6 +2,9 @@ import React, {useEffect, useRef, useState} from "react";
 import classNames from "classnames/bind";
 import {Splide, SplideSlide} from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 import styles from "./Home.module.scss";
 import images from "~/assets/images";
 import DefaultLayout from "~/layouts/DefaultLayout/DefaultLayout ";
@@ -11,6 +14,8 @@ import {BsArrowUpRight} from "react-icons/bs";
 import Loader from "~/components/Loading/Loading";
 import {Container, Row, Col, Button} from "react-bootstrap";
 import {TypeAnimation} from "react-type-animation";
+import {Swiper, SwiperSlide} from "swiper/react";
+import {Navigation, Pagination, Mousewheel, Keyboard, Autoplay} from "swiper/modules";
 
 const cx = classNames.bind(styles);
 const Home = () => {
@@ -114,23 +119,23 @@ const Home = () => {
           <section className={cx("features")}>
             <div className={cx("container")}>
               <h2>Main Features</h2>
-              <Container className={cx("feature-list")}>
-                <Row className={cx("card")}>
-                  <Col lg={4} md={12} className={cx("card-item")}>
+              <Container fluid className={cx("feature-list")}>
+                <Row className={cx("card", "gap-4")}>
+                  <Col lg={12} md={12} className={cx("card-item")}>
                     <FeatureCard
                       title="Remote monitoring"
                       description="Monitor sensor data anytime, anywhere"
                       img={images.img42}
                     />
                   </Col>
-                  <Col lg={4} md={12} className={cx("card-item")}>
+                  <Col lg={12} md={12} className={cx("card-item")}>
                     <FeatureCard
                       title="Remote control"
                       description="Process & display reports in real time"
                       img={images.img43}
                     />
                   </Col>
-                  <Col lg={4} md={12} className={cx("card-item")}>
+                  <Col lg={12} md={12} className={cx("card-item")}>
                     <FeatureCard
                       title="Data statistics"
                       description="Improve operational efficiency & save costs"
@@ -144,9 +149,8 @@ const Home = () => {
 
           <section className={cx("image-section")}>
             <div className={cx("container")}>
-              <h2>Illustration Image</h2>
               <div className={cx("carousel-container")}>
-                <Splide
+                {/* <Splide
                   options={{
                     perPage: 3, // Hiển thị 3 ảnh trên 1 slide
                     perMove: 1, // Di chuyển từng ảnh mỗi lần
@@ -168,12 +172,60 @@ const Home = () => {
                       </SplideSlide>
                     );
                   })}
-                </Splide>
+                </Splide> */}
+                <Swiper
+                  cssMode={true}
+                  navigation={true}
+                  pagination={{
+                    clickable: true,
+                  }}
+                  autoplay={{
+                    delay: 2500,
+                    disableOnInteraction: false,
+                  }}
+                  mousewheel={true}
+                  keyboard={true}
+                  breakpoints={{
+                    0: {
+                      pagination: {
+                        enabled: false, // Ẩn pagination ở màn hình nhỏ
+                      },
+                    },
+                    992: {
+                      pagination: {
+                        enabled: true, // Hiển thị pagination ở màn hình lớn hơn 992px
+                        clickable: true,
+                      },
+                    },
+                  }}
+                  modules={[Autoplay, Navigation, Pagination, Mousewheel, Keyboard]}
+                  className={cx("mySwiper")}
+                  style={{
+                    paddingBottom: "30px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    background: "#fff",
+                    "--swiper-pagination-color": "#000c", // Màu chính (active)
+                    "--swiper-pagination-bullet-inactive-color": "#999999", // Màu không active
+                    "--swiper-pagination-bullet-inactive-opacity": "0.5", // Độ mờ khi không active
+                    "--swiper-pagination-bullet-size": "8px", // Kích thước
+                    "--swiper-pagination-bullet-horizontal-gap": "4px", // Khoảng cách giữa các dots
+                  }} // Thêm padding
+                >
+                  {Object.values(images).map((image, index) => {
+                    return (
+                      <SwiperSlide key={index}>
+                        <img src={image} alt={image.alt} className="image" />
+                      </SwiperSlide>
+                    );
+                  })}
+                </Swiper>
               </div>
             </div>
           </section>
 
-          <section className={cx("py-4", "py-md-5", "cta")}>
+          <section className={cx("cta")}>
             <Container fluid className={cx("container-section")}>
               <div className={cx("container")}>
                 <Row className={cx("align-items-center", "wrapper")}>
