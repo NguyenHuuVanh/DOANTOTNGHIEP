@@ -1,4 +1,4 @@
-import {useState, useEffect} from "react";
+import {useState, useEffect, useCallback} from "react";
 import axiosInstance from "~/apis/index";
 
 const useFetchData = (url) => {
@@ -6,24 +6,30 @@ const useFetchData = (url) => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get(url);
+      setData(response.data);
+      return response.data;
+    } catch (err) {
+      console.error("Error fetching node data:", err);
+      setError(err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [url]);
+
+  const refetch = useCallback(() => {
+    return fetchData();
+  }, [fetchData]);
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await axiosInstance.get(url);
-        setData(response.data);
-      } catch (err) {
-        console.error("Error fetching node data:", err);
-        setError(err); // Lưu lại lỗi để thông báo trong component
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData(); // Gọi hàm fetch dữ liệu khi component mount
-  }, [url]); // Chạy lại khi URL thay đổi
+  }, [fetchData]); // Chạy lại khi fetchData thay đổi
 
-  return {data, error, loading}; // Trả về các giá trị state cho component
+  return {data, error, loading, refetch};
 };
 
 export default useFetchData;

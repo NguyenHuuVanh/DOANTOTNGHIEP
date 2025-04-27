@@ -7,10 +7,13 @@ $text-light: #6b7280;
 $border-color: #e5e7eb;
 $background-color: #f9fafb;
 $white: #ffffff;
-$box-shadow:
-  0 4px 6px -1px rgba(0, 0, 0, 0.1),
-  0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 $border-radius: 8px;
+$mobile-breakpoint: 576px;
+$tablet-breakpoint: 768px;
+$desktop-breakpoint: 992px;
+$large-desktop-breakpoint: 1200px;
+$extra-large-desktop-breakpoint: 1400px;
 
 // Mixins
 @mixin flex-center {
@@ -26,12 +29,29 @@ $border-radius: 8px;
 // Registration container
 .registrationContainer,
 .signinContainer {
-  // min-height: 100vh;
-  // max-height: 100vh;
   width: 100%;
   display: flex;
   gap: 40px;
   padding: 2rem;
+
+  @media (max-width: $tablet-breakpoint) {
+    min-height: auto; // Bỏ chiều cao cố định trên mobile
+    max-height: none;
+    padding: 1rem;
+  }
+}
+
+.signinFormRow {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+
+  @media (max-width: $tablet-breakpoint) {
+    flex-flow: column;
+    gap: 2rem;
+  }
 }
 
 .registrationFormWrapper,
@@ -39,12 +59,8 @@ $border-radius: 8px;
   background-color: $white;
   border-radius: $border-radius;
   // background-color: #ccc;
-  width: 70%;
+  width: 100%;
   padding: 2.5rem;
-
-  @media (max-width: 640px) {
-    padding: 1.5rem;
-  }
 
   h1 {
     font-size: 4.8rem;
@@ -60,16 +76,40 @@ $border-radius: 8px;
     font-size: 1.8rem;
     font-style: italic;
   }
+
+  @media screen and (max-width: $desktop-breakpoint) {
+    padding: 2rem 1.5rem;
+    h1 {
+      font-size: 3.6rem;
+    }
+    .formSubtitle {
+      font-size: 1.6rem;
+    }
+  }
 }
 
 .registrationFormContent,
 .signupFormContent {
-  width: 50%;
+  width: 80%;
+
+  @media (max-width: $tablet-breakpoint) {
+    width: 100%;
+    max-height: 300px; // Giới hạn chiều cao trên mobile
+    overflow: hidden;
+  }
 
   img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: contain; // Thay vì cover
+
+    @media (max-width: $tablet-breakpoint) {
+      max-height: 300px;
+    }
+  }
+
+  @media screen and (max-width: $desktop-breakpoint) {
+    display: none;
   }
 }
 
@@ -91,6 +131,7 @@ $border-radius: 8px;
 }
 
 .formGroup {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -114,6 +155,11 @@ $border-radius: 8px;
       border-color: $primary-color;
       box-shadow: 0 0 0 3px rgba($primary-color, 0.2);
     }
+
+    @media screen and (max-width: $desktop-breakpoint) {
+      font-size: 1.4rem;
+      padding: 10px 8px;
+    }
   }
 
   input[type="password"] {
@@ -127,12 +173,14 @@ $border-radius: 8px;
   .showPassword,
   .showConfirmPassword {
     position: absolute;
-    right: 46%;
+    right: 0;
+    top: 0;
     color: #000;
     border: none;
     opacity: 0.3;
     width: 20px;
     height: 20px;
+    transform: translate(-20px, 37px);
     cursor: pointer;
     transition: transform 0.2s ease;
 
@@ -146,7 +194,7 @@ $border-radius: 8px;
 .signinContainer {
   .showPassword {
     bottom: 42%;
-    transform: translateY(2px);
+    transform: translate(-20px, 36px);
   }
 }
 
@@ -190,7 +238,7 @@ $border-radius: 8px;
   font-size: 1.8rem;
   font-weight: 500;
   cursor: pointer;
-  margin-top: 0.5rem;
+  margin-top: 20px;
   @include transition;
 
   &:hover:not(:disabled) {
@@ -200,6 +248,12 @@ $border-radius: 8px;
   &:disabled {
     opacity: 0.7;
     cursor: not-allowed;
+  }
+
+  @media screen and (max-width: $desktop-breakpoint) {
+    font-size: 1.6rem;
+    padding: 12px 0;
+    margin-top: 20px;
   }
 }
 
@@ -216,6 +270,10 @@ $border-radius: 8px;
     &:hover {
       text-decoration: underline;
     }
+  }
+
+  @media screen and (max-width: $desktop-breakpoint) {
+    font-size: 1.2rem;
   }
 }
 
@@ -262,13 +320,12 @@ $border-radius: 8px;
   }
 
   &:hover {
-   background-color: $success-color;
-   color: #fff;
+    background-color: $success-color;
+    color: #fff;
 
-   svg{
-    transform: translateX(65px);
-
-   }
+    svg {
+      transform: translateX(65px);
+    }
   }
 }
 
@@ -336,9 +393,9 @@ $border-radius: 8px;
     font-size: 1.2rem;
     text-decoration: none;
     color: #275eac;
-    
+
     &:hover {
-      color: #1B4B90;
+      color: #1b4b90;
     }
   }
 }
@@ -357,10 +414,51 @@ $border-radius: 8px;
 .signinContainer .signinForm {
   display: flex;
   flex-direction: column;
-  gap: 25px;
+
+  @media screen and (max-width: $desktop-breakpoint) {
+    .formGroup {
+      label {
+        font-size: 1.2rem;
+      }
+
+      input {
+        font-size: 1.4rem;
+        padding: 10px 8px;
+      }
+
+      span {
+        font-size: 1rem;
+      }
+    }
+
+    .formOptions {
+      .rememberMe {
+        input {
+          width: 12px;
+          height: 12px;
+        }
+
+        label {
+          font-size: 1rem;
+          font-weight: 500;
+          margin-left: 10px;
+        }
+      }
+
+      .forgotPassword {
+        font-size: 1rem;
+      }
+    }
+
+    .submitButton {
+      font-size: 1.4rem;
+      padding: 12px 0;
+      margin-top: 20px;
+    }
+  }
 }
 
-.hide{
+.hide {
   opacity: 0;
   visibility: hidden;
 }

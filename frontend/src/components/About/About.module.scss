@@ -3,6 +3,9 @@ $primary-color: #2d3436;
 $secondary-color: #636e72;
 $accent-color: #0984e3;
 $divider-color: #dfe6e9;
+$mobile-breakpoint: 768px;
+$tablet-breakpoint: 992px;
+$desktop-breakpoint: 1200px;
 
 .team-page {
   width: 100%;
@@ -37,6 +40,18 @@ $divider-color: #dfe6e9;
     background: white;
     border-radius: 8px;
     padding: 2rem 40px;
+
+    @media screen and (max-width: $desktop-breakpoint) {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    @media screen and (max-width: $tablet-breakpoint) {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    @media screen and (max-width: $mobile-breakpoint) {
+      grid-template-columns: 1fr;
+    }
   }
 
   .team-member {
@@ -64,6 +79,10 @@ $divider-color: #dfe6e9;
       text-transform: uppercase;
       color: $primary-color;
       margin-bottom: 0.5rem;
+
+      @media screen and (max-width: $tablet-breakpoint) {
+        font-size: 1.6rem;
+      }
     }
 
     .member-role {
@@ -102,5 +121,5 @@ $divider-color: #dfe6e9;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; 
+  height: 100vh;
 }

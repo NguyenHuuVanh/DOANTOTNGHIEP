@@ -1,0 +1,32 @@
+.infomation {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-bottom: 1px solid #eee;
+  padding: 15px;
+  padding-right: 0;
+
+  .card {
+    width: 100%;
+    padding: 16px;
+    background: rgb(17, 4, 134);
+    border-radius: 15px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    display: flex;
+    color: white;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+    flex-direction: column;
+    background: linear-gradient(to right, rgb(20, 30, 48), rgb(36, 59, 85));
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+
+    .table {
+      font-size: 18px;
+      text-align: left;
+    }
+  }
+}

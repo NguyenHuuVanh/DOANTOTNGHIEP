@@ -54,14 +54,14 @@ const DeviceStatistics = () => {
           const combinedData = [...processedDataNode1, ...processedDataNode2];
           const sorted = sortedData(combinedData);
           setDataNodes(sorted);
-          setFilteredData(sorted); // ✅ Dùng biến sorted trực tiếp
+          setFilteredData(sorted);
         } else {
           const nodeKey = selectedDevice.toLowerCase().replace(" ", "");
           const data = dataNode?.[nodeKey] || [];
           const processedData = processData(data, selectedDevice);
           const sorted = sortedData(processedData);
           setDataNodes(sorted);
-          setFilteredData(sorted); // ✅ Fix tương tự
+          setFilteredData(sorted);
         }
       }
     } catch (error) {
@@ -76,20 +76,20 @@ const DeviceStatistics = () => {
       return;
     }
 
-    const formattedDates = dates.map((d) => d.format("DD-MM-YYYY")); // ← chuyển về chuỗi "24-12-2024"
+    const formattedDates = dates.map((d) => d.format("DD-MM-YYYY"));
 
-    setDateRange(formattedDates); // ← kết quả là mảng string ["24-12-2024", "24-12-2024"]
+    setDateRange(formattedDates);
   };
 
   // Xử lý thay đổi giờ
   const handleTimeChange = (times) => {
     if (!times || times.length < 2 || !times[0] || !times[1]) {
-      setTimeRange([TIMEPARAMS.BEGIN, TIMEPARAMS.END]); // hoặc giá trị mặc định bạn muốn
+      setTimeRange([TIMEPARAMS.BEGIN, TIMEPARAMS.END]);
       return;
     }
 
-    const formattedTimes = times.map((t) => t.format("HH:mm")); // ← chuyển về chuỗi giờ
-    setTimeRange(formattedTimes); // → ["09:00", "18:00"]
+    const formattedTimes = times.map((t) => t.format("HH:mm"));
+    setTimeRange(formattedTimes);
   };
 
   const handleFilter = () => {
@@ -231,7 +231,7 @@ const DeviceStatistics = () => {
               defaultValue={[TIMEPARAMS.startTime, TIMEPARAMS.endTime]}
               format="HH:mm"
               onChange={handleTimeChange}
-              disabled={!dateRange || !dateRange[0] || !dateRange[1]} // Chỉ kích hoạt khi người dùng chọn ngày
+              disabled={!dateRange || !dateRange[0] || !dateRange[1]}
               style={{width: "100%", borderRadius: "2px"}}
             />
           </div>

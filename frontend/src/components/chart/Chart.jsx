@@ -51,8 +51,8 @@ const Chart = ({data}) => {
   return (
     <div style={{width: "", height: "600px", margin: "20px 0"}}>
       <ResponsiveContainer width="100%" height="100%">
-        {/* <LineChart data={mappedData.splice(0, 20)}> */}
-        <LineChart data={filteredData.splice(filteredData.length - 21, filteredData.length - 1)}>
+        <LineChart data={filteredData.slice(-20)}>
+          {/* <LineChart data={filteredData.splice(filteredData.length - 21, filteredData.length - 1)}> */}
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" padding={{left: 30, right: 30}} tick={{fontSize: 14}} />
           <YAxis />

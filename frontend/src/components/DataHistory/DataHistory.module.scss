@@ -1,0 +1,55 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #000;
+
+  .histories {
+    background-color: #fff;
+    height: 100%;
+
+    .his_content {
+      color: #000000;
+      overflow-y: auto;
+      height: 400px;
+
+      table {
+        width: 100%;
+        font-size: 1.2rem;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+
+        tr:first-child {
+          border-bottom: 1px solid #000000;
+        }
+
+        tr:not(:first-child) {
+          border-bottom: 1px solid #000000;
+        }
+
+        th,
+        td {
+          text-align: left;
+          padding: 8px;
+          height: 36px;
+        }
+
+        thead {
+          th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background-color: #48dbfb;
+          }
+        }
+
+        tbody {
+          overflow-y: scroll;
+          height: 400px;
+        }
+      }
+    }
+  }
+}
